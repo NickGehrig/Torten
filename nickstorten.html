@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Nicks Torten</title>
+  <link rel="stylesheet" href="styler.css"> 
+</head>
+<body>
+  <header>
+    <h1>Nicks Torten</h1>
+    <div class="kontakt">Bitte ruf mich an oder schreib mir eine Email, um eine Torte zu bestellen: <strong>076 420 01 13 / <a href="mailto:nickgeri.gmx.ch">nickgehrig@gmx.ch</a></strong></div>
+       
+  
+  </header>
+
+  <div class="torten-container">
+    <div class="torte">
+      <img src="Erdbeertorte.jpg" alt="Erdbeertorte">
+      <h2>Erdbeertorte</h2>
+      <p>Preis: 35Fr.</p>
+      <p>Bestellung: mindestens 1 Woche im Voraus</p>
+    </div>
+
+    <div class="torte">
+      <img src="Himbeertorte.jpg" alt="Himbeertorte">
+      <h2>Himbeertorte</h2>
+      <p>Preis: 35Fr.</p>
+      <p>Bestellung: mindestens 1 Woche im Voraus</p>
+    </div>
+
+    <div class="torte">
+      <img src="Schwarzwäldertorte.jpg" alt="Schwarzwäldertorte">
+      <h2>Schokotorte</h2>
+      <p>Preis: 35Fr.</p>
+      <p>Bestellung: mindestens 1 Woche im Voraus</p>
+    </div>
+</body>
+  </div>
+
+  <script>
+   
+    const images = document.querySelectorAll('.torte img');
+    
+   
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    document.body.appendChild(overlay);
+    
+  
+    images.forEach(image => {
+      image.addEventListener('click', () => {
+        const largeImage = document.createElement('img');
+        largeImage.src = image.src; 
+        overlay.innerHTML = '';      
+        overlay.appendChild(largeImage);
+        overlay.style.display = 'flex';  
+      });
+    });
+  
+   
+    overlay.addEventListener('click', () => {
+      overlay.style.display = 'none';  
+    });
+  </script>
+  
+  
+</html>
