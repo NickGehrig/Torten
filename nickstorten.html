@@ -3,65 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <title>Nicks Torten</title>
-  <link rel="stylesheet" href="styler.css"> 
+  <link rel="stylesheet" href="styler.css">
 </head>
 <body>
   <header>
     <h1>Nicks Torten</h1>
-    <div class="kontakt">Bitte ruf mich an oder schreib mir eine Email, um eine Torte zu bestellen: <strong>076 420 01 13 / <a href="mailto:nickgeri.gmx.ch">nickgehrig@gmx.ch</a></strong></div>
-       
-  
+    <p class="kontakt">Bestelle telefonisch oder per E-Mail: <strong>076 420 01 13</strong> / <a href="mailto:nickgehrig@gmx.ch">nickgehrig@gmx.ch</a></p>
   </header>
 
   <div class="torten-container">
-    <div class="torte">
+    <div class="torte" data-name="Erdbeertorte" data-preis="35 Fr." data-info="Saftige Erdbeertorte mit frischer Sahne, ideal für jede Feier." data-img="Erdbeertorte.jpg">
       <img src="Erdbeertorte.jpg" alt="Erdbeertorte">
       <h2>Erdbeertorte</h2>
-      <p>Preis: 35Fr.</p>
+      <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
 
-    <div class="torte">
+    <div class="torte" data-name="Himbeertorte" data-preis="35 Fr." data-info="Fruchtige Himbeertorte mit Sahne, frisch und lecker." data-img="Himbeertorte.jpg">
       <img src="Himbeertorte.jpg" alt="Himbeertorte">
       <h2>Himbeertorte</h2>
-      <p>Preis: 35Fr.</p>
+      <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
 
-    <div class="torte">
+    <div class="torte" data-name="Schwarzwäldertorte" data-preis="35 Fr." data-info="Klassische Schwarzwälder ohne Kirschtorte mit Schlagsahne." data-img="Schwarzwäldertorte.jpg">
       <img src="Schwarzwäldertorte.jpg" alt="Schwarzwäldertorte">
-      <h2>Schokotorte</h2>
-      <p>Preis: 35Fr.</p>
+      <h2>Schwarzwälder</h2>
+      <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-</body>
+
+    <div class="torte" data-name="Cheesecake" data-preis="25 Fr." data-info="Cremiger Cheesecake mit feinem Boden." data-img="Cheesecake.jpg">
+      <img src="Cheesecake.jpg" alt="Cheesecake">
+      <h2>Cheesecake</h2>
+      <p>Preis: 25 Fr.</p>
+      <p>Bestellung: Mindestens 1 Woche im Voraus</p>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="overlay" id="lightbox">
+    <div class="lightbox-content">
+      <span id="closeBtn">&times;</span>
+      <img id="lightbox-img" src="" alt="">
+      <h3 id="lightbox-title"></h3>
+      <p id="lightbox-info"></p>
+      <p id="lightbox-preis"></p>
+    </div>
   </div>
 
   <script>
-   
-    const images = document.querySelectorAll('.torte img');
-    
-   
-    const overlay = document.createElement('div');
-    overlay.classList.add('overlay');
-    document.body.appendChild(overlay);
-    
-  
-    images.forEach(image => {
-      image.addEventListener('click', () => {
-        const largeImage = document.createElement('img');
-        largeImage.src = image.src; 
-        overlay.innerHTML = '';      
-        overlay.appendChild(largeImage);
-        overlay.style.display = 'flex';  
+    const torten = document.querySelectorAll('.torte');
+    const overlay = document.getElementById('lightbox');
+    const img = document.getElementById('lightbox-img');
+    const title = document.getElementById('lightbox-title');
+    const info = document.getElementById('lightbox-info');
+    const preis = document.getElementById('lightbox-preis');
+    const closeBtn = document.getElementById('closeBtn');
+
+    torten.forEach(torte => {
+      torte.addEventListener('click', () => {
+        img.src = torte.dataset.img;
+        title.textContent = torte.dataset.name;
+        info.textContent = torte.dataset.info;
+        preis.textContent = `Preis: ${torte.dataset.preis}`;
+        overlay.style.display = 'flex';
       });
     });
-  
-   
-    overlay.addEventListener('click', () => {
-      overlay.style.display = 'none';  
+
+    closeBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.style.display = 'none';
+      }
     });
   </script>
-  
-  
+</body>
 </html>
