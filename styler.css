@@ -35,10 +35,10 @@ h1 {
 
 .torten-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);  /* Zwei Spalten */
-  gap: 30px;  /* Abstand zwischen den Torten */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
   padding: 40px;
-  justify-items: center;  /* Zentrieren der Torten */
+  justify-items: center;
   margin-top: 30px;
 }
 
@@ -51,7 +51,7 @@ h1 {
   transition: transform 0.3s ease;
   cursor: pointer;
   width: 100%;
-  max-width: 400px;  /* Maximale Breite der Torten */
+  max-width: 400px;
 }
 
 .torte:hover {
@@ -61,7 +61,7 @@ h1 {
 .torte img {
   width: 100%;
   height: 220px;
-  object-fit: contain;  /* Bilder werden nicht abgeschnitten, sondern passen vollständig */
+  object-fit: contain;
   border-radius: 10px;
   background-color: #fce4ec;
 }
@@ -101,7 +101,7 @@ h1 {
 #lightbox-img {
   width: 100%;
   max-height: 300px;
-  object-fit: contain;  /* Hier ebenfalls den gleichen Effekt wie bei den Tortenbildern */
+  object-fit: contain;
   border-radius: 10px;
   margin-bottom: 20px;
 }
@@ -114,31 +114,96 @@ h1 {
   cursor: pointer;
   color: #888;
 }
-/* Popup Hintergrundfarbe ändern */
-.overlay {
-  display: none;
+
+/* Warenkorb */
+#warenkorb-button {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8); /* Dunkler Hintergrund */
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  top: 20px;
+  right: 20px;
+  background-color: #ff4d6d;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 1.2em;
+  z-index: 1100;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.overlay .popup-content {
-  background-color: #ffb6c1; /* Rosa Hintergrund für das Popup */
+#warenkorb-count {
+  background-color: white;
+  color: #ff4d6d;
+  border-radius: 50%;
+  padding: 2px 8px;
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+.popup-content {
+  background-color: #fff0f5;
   padding: 20px;
   border-radius: 10px;
-  width: 70%;
+  width: 90%;
   max-width: 500px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  text-align: left;
 }
 
-.overlay img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
+#warenkorb-items {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.warenkorb-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+.warenkorb-item span {
+  flex: 1;
+}
+
+.warenkorb-item input {
+  width: 40px;
+  text-align: center;
+  margin: 0 5px;
+}
+
+.warenkorb-item button {
+  background: none;
+  border: none;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+}
+/* Stil für die Bestätigungsmeldungen */
+.message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  z-index: 9999;
+  display: none;
+}
+
+.message.success {
+  background-color: #4CAF50; /* Grün für Erfolg */
+}
+
+.message.error {
+  background-color: #f44336; /* Rot für Fehler */
+}
+
+/* Damit die Nachricht nach 3 Sekunden erscheint */
+.message.show {
+  display: block;
 }

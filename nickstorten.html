@@ -8,32 +8,33 @@
 <body>
   <header>
     <h1>Nicks Torten</h1>
-    <p class="kontakt">Bestelle telefonisch oder per E-Mail: <strong>076 420 01 13</strong> / <a href="mailto:nickgehrig@gmx.ch">nickgehrig@gmx.ch</a></p>
+    <p class="kontakt">Bestellung per Wartekorb, bei Fehlermeldung Ruf mich an oder schreibe mir eine email: <strong>076 420 01 13</strong> / <a href="mailto:nickgehrig@gmx.ch"> nickgehrig@gmx.ch</a></p>
   </header>
 
+  <!-- Warenkorb Button -->
+  <div id="warenkorb-button">🛒 <span id="warenkorb-count">0</span></div>
+
+  <!-- Torten -->
   <div class="torten-container">
-    <div class="torte" data-name="Erdbeertorte" data-preis="35 Fr." data-info="Saftige Erdbeertorte mit frischer Sahne, ideal für jede Feier." data-img="Erdbeertorte.jpg">
+    <div class="torte" data-name="Erdbeertorte" data-preis="35" data-info="Saftige Erdbeertorte mit frischer Sahne, ideal für jede Feier." data-img="Erdbeertorte.jpg">
       <img src="Erdbeertorte.jpg" alt="Erdbeertorte">
       <h2>Erdbeertorte</h2>
       <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-
-    <div class="torte" data-name="Himbeertorte" data-preis="35 Fr." data-info="Fruchtige Himbeertorte mit Sahne, frisch und lecker." data-img="Himbeertorte.jpg">
+    <div class="torte" data-name="Himbeertorte" data-preis="35" data-info="Fruchtige Himbeertorte mit Sahne, frisch und lecker." data-img="Himbeertorte.jpg">
       <img src="Himbeertorte.jpg" alt="Himbeertorte">
       <h2>Himbeertorte</h2>
       <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-
-    <div class="torte" data-name="Schwarzwäldertorte" data-preis="35 Fr." data-info="Klassische Schwarzwälder mit Schlagsahne und mit oder ohne Kirschen." data-img="Schwarzwäldertorte.jpg">
-      <img src="Schwarzwäldertorte.jpg" alt="Schwarzwäldertorte">
+    <div class="torte" data-name="Schwarzwälder" data-preis="35" data-info="Klassische Schwarzwälder mit Schlagsahne und mit oder ohne Kirschen." data-img="Schwarzwäldertorte.jpg">
+      <img src="Schwarzwäldertorte.jpg" alt="Schwarzwälder">
       <h2>Schwarzwälder</h2>
       <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-
-    <div class="torte" data-name="Cheesecake" data-preis="25 Fr." data-info="Cremiger Cheesecake mit feinem Boden." data-img="Cheesecake.jpg">
+    <div class="torte" data-name="Cheesecake" data-preis="25" data-info="Cremiger Cheesecake mit feinem Boden." data-img="Cheesecake.jpg">
       <img src="Cheesecake.jpg" alt="Cheesecake">
       <h2>Cheesecake</h2>
       <p>Preis: 25 Fr.</p>
@@ -52,34 +53,129 @@
     </div>
   </div>
 
+  <!-- Warenkorb-Popup -->
+  <div id="warenkorb-popup" class="overlay">
+    <div class="popup-content">
+      <h2>Warenkorb</h2>
+      <div id="warenkorb-items"></div>
+      <p id="gesamtpreis">Gesamt: 0 Fr.</p>
+      <button id="bestellung-weiter">Warenkorb abschließen</button>
+      <button onclick="closeWarenkorb()">Schließen</button>
+    </div>
+  </div>
+
+  <!-- Bestellformular (wird erst bei Klick auf "Warenkorb abschließen" angezeigt) -->
+  <div id="bestellformular" class="overlay" style="display:none;">
+    <div class="popup-content">
+      <h2>Bestellung abschließen</h2>
+      <form action="https://formspree.io/f/xbloagqo" method="POST" id="bestell-form">
+  <label for="Vorname">Vorname:</label>
+<input type="text" id="Vorname" name="Vorname" required><br><br>
+ <label for="Nachname">Nachname:</label>
+<input type="text" id="Nachname" name="Nachname" required><br><br>
+ 
+        <label for="email">E-Mail-Adresse:</label>
+  <input type="email" id="email" name="email" required><br><br>
+ 
+  <label for="telefon">Telefonnummer:</label>
+<input type="tel" id="telefon" name="telefon" required><br><br>
+
+
+  <label for="wunschdatum">Wunschdatum:</label>
+  <input type="date" id="wunschdatum" name="wunschdatum" required><br><br>
+
+  <label for="ort">Lieferort:</label>
+  <input type="text" id="ort" name="ort" required><br><br>
+  
+  <label for="Strasse">Strasse und Hausnummer:</label>
+<input type="text" id="ort" name="ort" required><br><br>
+
+  <label for="bemerkung">Bemerkung:</label>
+  <textarea id="bemerkung" name="bemerkung" rows="4" cols="50"></textarea><br><br>
+
+  <!-- Hier kannst du auch Torteninformationen als versteckte Felder mitschicken -->
+  <input type="hidden" id="tortenliste" name="tortenliste">
+
+  <button type="submit">Bestellung abschließen</button>
+</form>
+
+      <button onclick="closeBestellformular()">Schließen</button>
+    </div>
+  </div>
+
+  <!-- Erfolg/Fehler Nachricht -->
+  <div id="nachricht" class="message" style="display: none;"></div>
+
+  
   <script>
-    const torten = document.querySelectorAll('.torte');
-    const overlay = document.getElementById('lightbox');
-    const img = document.getElementById('lightbox-img');
-    const title = document.getElementById('lightbox-title');
-    const info = document.getElementById('lightbox-info');
-    const preis = document.getElementById('lightbox-preis');
-    const closeBtn = document.getElementById('closeBtn');
+  // Funktion zum Öffnen des Warenkorbs
+  document.getElementById("warenkorb-button").addEventListener("click", function() {
+    document.getElementById("warenkorb-popup").style.display = "block";
+  });
 
-    torten.forEach(torte => {
-      torte.addEventListener('click', () => {
-        img.src = torte.dataset.img;
-        title.textContent = torte.dataset.name;
-        info.textContent = torte.dataset.info;
-        preis.textContent = `Preis: ${torte.dataset.preis}`;
-        overlay.style.display = 'flex';
-      });
-    });
+  // Funktion zum Schließen des Warenkorbs
+  function closeWarenkorb() {
+    document.getElementById("warenkorb-popup").style.display = "none";
+  }
 
-    closeBtn.addEventListener('click', () => {
-      overlay.style.display = 'none';
-    });
+  // Warenkorb weiter
+  document.getElementById("bestellung-weiter").addEventListener("click", function() {
+    // Zeige Bestellformular
+    document.getElementById("bestellformular").style.display = "block";
+    closeWarenkorb(); // Schließe Warenkorb
+  });
 
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        overlay.style.display = 'none';
+  // Funktion zum Schließen des Bestellformulars
+  function closeBestellformular() {
+    document.getElementById("bestellformular").style.display = "none";
+  }
+
+  // Formular abschicken
+  document.getElementById("bestell-form").addEventListener("submit", function(event) {
+    event.preventDefault(); // Verhindert, dass das Formular sofort abschickt
+
+    const formData = new FormData(this);
+
+    // AJAX-Anfrage senden
+    fetch("bestellung.php", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.text())
+    .then(result => {
+      if (result === "success") {
+        showMessage("Bestellung wurde erfolgreich gesendet!", "success");
+        // Alle Popups und das Bestellformular ausblenden
+        setTimeout(function() {
+          document.getElementById("bestellformular").style.display = "none";
+          document.getElementById("nachricht").style.display = "none";
+          document.getElementById("warenkorb-popup").style.display = "none";
+        }, 3000); // Erfolgsnachricht bleibt 3 Sekunden sichtbar
+      } else {
+        showMessage("Bestellung konnte nicht gesendet werden. Bitte versuche es später nochmal.", "error");
       }
+    })
+    .catch(() => {
+      showMessage("bitte habe geduld.", "");
     });
-  </script>
+  });
+
+  // Funktion zur Anzeige der Nachricht
+  function showMessage(message, type) {
+    const messageContainer = document.getElementById("nachricht");
+    messageContainer.textContent = message;
+    messageContainer.classList.add(type);
+    messageContainer.style.display = "block";
+
+    // Nachricht nach 3 Sekunden verschwinden lassen
+    setTimeout(() => {
+      messageContainer.style.display = "none";
+      messageContainer.classList.remove(type);
+    }, 3000);
+  }
+</script>
+
+
+  <script src="script.js"></script>
 </body>
 </html>
