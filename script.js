@@ -243,3 +243,92 @@ bestellungSendenBtn.addEventListener('click', () => {
   // Formular absenden (E-Mail wird nun erst jetzt gesendet)
   bestellForm.submit();
 });
+document.addEventListener('DOMContentLoaded', () => {
+  const paypalPopup = document.getElementById('paypal-popup');
+  const openPaypalBtn = document.getElementById('open-paypal');
+  const paidConfirmBtn = document.getElementById('paid-confirmation');
+  const paypalCloseBtn = document.getElementById('paypal-close');
+  const bezahlenBtn = document.getElementById('bezahlen-btn');
+  const bestellForm = document.getElementById('bestell-form');
+
+  // ... dein restlicher Code hier, z.B. Eventlistener setzen etc.
+});
+
+let paypalLink = "";  // Hier wird später der PayPal-Link gespeichert
+
+// Beispiel: Funktion um den PayPal-Link mit dem korrekten Betrag zu generieren
+function generierePaypalLink(betrag) {
+  // Link mit Betrag einfügen (hier PayPal.me als Beispiel)
+  return `https://www.paypal.me/DeinPaypalName/${betrag}`;
+}
+
+// Wenn Warenkorb aktualisiert wird, aktiviere oder deaktiviere den "Bezahlen"-Button
+// (Das solltest du schon in deinem Code haben, sonst hier ergänzen)
+
+// Event-Listener für den Bezahlen-Button (öffnet das Popup)
+bezahlenBtn.addEventListener('click', () => {
+  // Beispiel: Berechne Gesamtsumme aus deinem Warenkorb (hier statisch als 100 Fr.)
+  const betrag = berechneGesamtbetrag(); // Implementiere diese Funktion, die du evtl. schon hast
+  paypalLink = generierePaypalLink(betrag);
+
+  // Popup anzeigen
+  paypalPopup.style.display = 'block';
+
+  // Button "Ich habe bezahlt" deaktivieren bis Link geöffnet wurde
+  paidConfirmBtn.disabled = true;
+});
+
+// PayPal-Link öffnen (externer Link)
+openPaypalBtn.addEventListener('click', () => {
+  if(paypalLink) {
+    window.open(paypalLink, '_blank', 'noopener');
+    paidConfirmBtn.disabled = false;
+  }
+});
+
+// Popup schließen
+paypalCloseBtn.addEventListener('click', () => {
+  paypalPopup.style.display = 'none';
+});
+
+// Bestätigung, dass bezahlt wurde
+paidConfirmBtn.addEventListener('click', () => {
+  // Formular absenden (Bestellung wird gesendet)
+  bestellForm.submit();
+
+  // Popup schließen
+  paypalPopup.style.display = 'none';
+});
+
+// Beispiel-Funktion (du musst deine tatsächliche Berechnung einbauen)
+function berechneGesamtbetrag() {
+  // Diese Funktion solltest du schon haben, wenn nicht:
+  // Summiere alle Preise aus Warenkorb-Items
+  // Hier nur ein Platzhalter:
+  return 100; // z.B. 100 Fr.
+}
+bezahlenBtn.addEventListener('click', () => {
+  // Berechne die Summe aus dem Warenkorb
+  let summe = 0;
+  warenkorb.forEach(item => {
+    summe += item.preis * item.menge;
+  });
+
+  // Generiere PayPal-Link mit dem Betrag
+  paypalLink = `https://paypal.me/SteGehrig/${summe.toFixed(2)}`;
+
+  // Popup anzeigen
+  paypalPopup.style.display = 'block';
+
+  // Button "Ich habe bezahlt" erstmal deaktivieren
+  paidConfirmBtn.disabled = true;
+});
+
+openPaypalBtn.addEventListener('click', () => {
+  if (paypalLink) {
+    const win = window.open('', '_blank', 'noopener,noreferrer');
+    win.location = paypalLink;
+    paidConfirmBtn.disabled = false;
+  }
+});
+
