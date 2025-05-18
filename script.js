@@ -189,3 +189,57 @@ function showMessage(message, type) {
 }
 
 updateWarenkorbAnzeige();
+const bezahlenBtn = document.getElementById('bezahlen-btn');
+const bestellForm = document.getElementById('bestell-form'); // ID deines Formulars anpassen!
+
+// Prüft, ob Pflichtfelder ausgefüllt sind
+function checkFormValidity() {
+  const vorname = document.getElementById('Vorname').value.trim();
+  const nachname = document.getElementById('Nachname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const telefon = document.getElementById('telefon').value.trim();
+  const wunschdatum = document.getElementById('wunschdatum').value.trim();
+  const ort = document.getElementById('ort').value.trim();
+
+  const valid = vorname && nachname && email && telefon && wunschdatum && ort;
+  bezahlenBtn.disabled = !valid;
+}
+
+// Listener für Eingabefelder
+['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort'].forEach(id => {
+  document.getElementById(id).addEventListener('input', checkFormValidity);
+});
+
+const bestellungSendenBtn = document.getElementById('bestellung-senden');
+
+bezahlenBtn.addEventListener('click', () => {
+  // Berechne Gesamtsumme aus deinem aktuellen Warenkorb
+  let summe = 0;
+  warenkorb.forEach(item => {
+    summe += item.preis * item.menge;
+  });
+
+  // PayPal.Me-Link mit deinem Namen und Betrag
+  const paypalLink = `https://paypal.me/SteGehrig/${summe.toFixed(2)}`;
+
+  // Öffne PayPal.Me Link in neuem Tab
+  window.open(paypalLink, '_blank');
+
+  // Button "Bestellung abschließen" aktivieren
+  bestellungSendenBtn.disabled = false;
+});
+
+// Klick auf "Bestellung abschließen" Button, um E-Mail zu senden
+bestellungSendenBtn.addEventListener('click', () => {
+  // Warenkorb-Details als Text
+  let warenkorbDetails = "";
+  warenkorb.forEach(item => {
+    warenkorbDetails += `${item.name} (Menge: ${item.menge}), `;
+  });
+
+  // Setze die Warenkorb-Details in das versteckte Feld
+  document.getElementById('tortenliste').value = warenkorbDetails.slice(0, -2);
+
+  // Formular absenden (E-Mail wird nun erst jetzt gesendet)
+  bestellForm.submit();
+});
