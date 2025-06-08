@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Nicks Torten</title>
-  <link rel="stylesheet" href="styler.css">
+  <link rel="stylesheet" href="styler.css" />
 </head>
 <body>
   <header>
     <h1>Nicks Torten</h1>
-    <p class="kontakt">Bestellung per Warenkorb, bei Fehlermeldung Ruf mich an oder schreibe mir eine email: <strong>076 420 01 13</strong> / <a href="mailto:nickgehrig@gmx.ch"> nickgehrig@gmx.ch</a></p>
+    <p class="kontakt">
+      Bestellung per Warenkorb, bei Fehlermeldung Ruf mich an oder schreibe mir eine email:
+      <strong>076 420 01 13</strong> /
+      <a href="mailto:nickgehrig@gmx.ch">nickgehrig@gmx.ch</a>
+    </p>
   </header>
 
   <!-- Warenkorb Button -->
@@ -16,26 +20,50 @@
 
   <!-- Torten -->
   <div class="torten-container">
-    <div class="torte" data-name="Erdbeertorte" data-preis="35" data-info="Saftige Erdbeertorte mit frischer Sahne, ideal für jede Feier." data-img="Erdbeertorte.jpg">
-      <img src="Erdbeertorte.jpg" alt="Erdbeertorte">
+    <div
+      class="torte"
+      data-name="Erdbeertorte"
+      data-preis="35"
+      data-info="Saftige Erdbeertorte mit frischer Sahne, ideal für jede Feier."
+      data-img="Erdbeertorte.jpg"
+    >
+      <img src="Erdbeertorte.jpg" alt="Erdbeertorte" />
       <h2>Erdbeertorte</h2>
       <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-    <div class="torte" data-name="Himbeertorte" data-preis="35" data-info="Fruchtige Himbeertorte mit Sahne, frisch und lecker." data-img="Himbeertorte.jpg">
-      <img src="Himbeertorte.jpg" alt="Himbeertorte">
+    <div
+      class="torte"
+      data-name="Himbeertorte"
+      data-preis="35"
+      data-info="Fruchtige Himbeertorte mit Sahne, frisch und lecker."
+      data-img="Himbeertorte.jpg"
+    >
+      <img src="Himbeertorte.jpg" alt="Himbeertorte" />
       <h2>Himbeertorte</h2>
       <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-    <div class="torte" data-name="Schwarzwälder" data-preis="35" data-info="Klassische Schwarzwälder mit Schlagsahne und mit oder ohne Kirschen." data-img="Schwarzwäldertorte.jpg">
-      <img src="Schwarzwäldertorte.jpg" alt="Schwarzwälder">
+    <div
+      class="torte"
+      data-name="Schwarzwälder"
+      data-preis="35"
+      data-info="Klassische Schwarzwälder mit Schlagsahne und mit oder ohne Kirschen."
+      data-img="Schwarzwäldertorte.jpg"
+    >
+      <img src="Schwarzwäldertorte.jpg" alt="Schwarzwälder" />
       <h2>Schwarzwälder</h2>
       <p>Preis: 35 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
     </div>
-    <div class="torte" data-name="Cheesecake" data-preis="25" data-info="Cremiger Cheesecake mit feinem Boden." data-img="Cheesecake.jpg">
-      <img src="Cheesecake.jpg" alt="Cheesecake">
+    <div
+      class="torte"
+      data-name="Cheesecake"
+      data-preis="25"
+      data-info="Cremiger Cheesecake mit feinem Boden."
+      data-img="Cheesecake.jpg"
+    >
+      <img src="Cheesecake.jpg" alt="Cheesecake" />
       <h2>Cheesecake</h2>
       <p>Preis: 25 Fr.</p>
       <p>Bestellung: Mindestens 1 Woche im Voraus</p>
@@ -43,10 +71,10 @@
   </div>
 
   <!-- Lightbox -->
-  <div class="overlay" id="lightbox">
+  <div class="overlay" id="lightbox" style="display:none;">
     <div class="lightbox-content">
-      <span id="closeBtn">&times;</span>
-      <img id="lightbox-img" src="" alt="">
+      <span id="closeBtn" style="cursor:pointer;">&times;</span>
+      <img id="lightbox-img" src="" alt="" />
       <h3 id="lightbox-title"></h3>
       <p id="lightbox-info"></p>
       <p id="lightbox-preis"></p>
@@ -54,7 +82,7 @@
   </div>
 
   <!-- Warenkorb-Popup -->
-  <div id="warenkorb-popup" class="overlay">
+  <div id="warenkorb-popup" class="overlay" style="display:none;">
     <div class="popup-content">
       <h2>Warenkorb</h2>
       <div id="warenkorb-items"></div>
@@ -64,40 +92,44 @@
     </div>
   </div>
 
-  <!-- Bestellformular (wird erst bei Klick auf "Warenkorb abschließen" angezeigt) -->
+  <!-- Bestellformular -->
   <div id="bestellformular" class="overlay" style="display:none;">
     <div class="popup-content">
       <h2>Bestellung abschließen</h2>
-      <form action="https://formspree.io/f/xbloagqo" method="POST" id="bestell-form">
-  <label for="Vorname">Vorname:</label>
-<input type="text" id="Vorname" name="Vorname" required><br><br>
- <label for="Nachname">Nachname:</label>
-<input type="text" id="Nachname" name="Nachname" required><br><br>
- 
+      <form
+        action="https://formspree.io/f/xbloagqo"
+        method="POST"
+        id="bestell-form"
+      >
+        <label for="Vorname">Vorname:</label>
+        <input type="text" id="Vorname" name="Vorname" required /><br /><br />
+
+        <label for="Nachname">Nachname:</label>
+        <input type="text" id="Nachname" name="Nachname" required /><br /><br />
+
         <label for="email">E-Mail-Adresse:</label>
-  <input type="email" id="email" name="email" required><br><br>
- 
-  <label for="telefon">Telefonnummer:</label>
-<input type="tel" id="telefon" name="telefon" required><br><br>
+        <input type="email" id="email" name="email" required /><br /><br />
 
+        <label for="telefon">Telefonnummer:</label>
+        <input type="tel" id="telefon" name="telefon" required /><br /><br />
 
-  <label for="wunschdatum">Wunschdatum:</label>
-  <input type="date" id="wunschdatum" name="wunschdatum" required><br><br>
+        <label for="wunschdatum">Wunschdatum:</label>
+        <input type="date" id="wunschdatum" name="wunschdatum" required /><br /><br />
 
-  <label for="ort">Lieferort:</label>
-  <input type="text" id="ort" name="ort" required><br><br>
-  
-  <label for="Strasse">Strasse und Hausnummer:</label>
-<input type="text" id="ort" name="ort" required><br><br>
+        <label for="ort">Lieferort:</label>
+        <input type="text" id="ort" name="ort" required /><br /><br />
 
-  <label for="bemerkung">Bemerkung:</label>
-  <textarea id="bemerkung" name="bemerkung" rows="4" cols="50"></textarea><br><br>
+        <label for="strasse">Strasse und Hausnummer:</label>
+        <input type="text" id="strasse" name="strasse" required /><br /><br />
 
+        <label for="bemerkung">Bemerkung:</label>
+        <textarea id="bemerkung" name="bemerkung" rows="4" cols="50"></textarea><br /><br />
 
- <button type="button" id="bezahlen-btn" disabled>Bezahlen</button>
-<input type="hidden" id="tortenliste" name="tortenliste">
-
-</form>
+        <button type="button" id="bezahlen-btn" disabled>
+          Bezahlen
+        </button>
+        <input type="hidden" id="tortenliste" name="tortenliste" />
+      </form>
 
       <button onclick="closeBestellformular()">Schließen</button>
     </div>
@@ -106,92 +138,30 @@
   <!-- Erfolg/Fehler Nachricht -->
   <div id="nachricht" class="message" style="display: none;"></div>
 
-  
-  <script>
-  // Funktion zum Öffnen des Warenkorbs
-  document.getElementById("warenkorb-button").addEventListener("click", function() {
-    document.getElementById("warenkorb-popup").style.display = "block";
-  });
-
-  // Funktion zum Schließen des Warenkorbs
-  function closeWarenkorb() {
-    document.getElementById("warenkorb-popup").style.display = "none";
-  }
-
-  // Warenkorb weiter
-  document.getElementById("bestellung-weiter").addEventListener("click", function() {
-    // Zeige Bestellformular
-    document.getElementById("bestellformular").style.display = "block";
-    closeWarenkorb(); // Schließe Warenkorb
-  });
-
-  // Funktion zum Schließen des Bestellformulars
-  function closeBestellformular() {
-    document.getElementById("bestellformular").style.display = "none";
-  }
-
-  // Formular abschicken
-  document.getElementById("bestell-form").addEventListener("submit", function(event) {
-    event.preventDefault(); // Verhindert, dass das Formular sofort abschickt
-
-    const formData = new FormData(this);
-
-    // AJAX-Anfrage senden
-    fetch("bestellung.php", {
-      method: "POST",
-      body: formData
-    })
-    .then(response => response.text())
-    .then(result => {
-      if (result === "success") {
-        showMessage("Bestellung wurde erfolgreich gesendet!", "success");
-        // Alle Popups und das Bestellformular ausblenden
-        setTimeout(function() {
-          document.getElementById("bestellformular").style.display = "none";
-          document.getElementById("nachricht").style.display = "none";
-          document.getElementById("warenkorb-popup").style.display = "none";
-        }, 3000); // Erfolgsnachricht bleibt 3 Sekunden sichtbar
-      } else {
-        showMessage("Bestellung konnte nicht gesendet werden. Bitte versuche es später nochmal.", "error");
-      }
-    })
-    .catch(() => {
-      showMessage("bitte habe geduld.", "");
-    });
-  });
-
-  // Funktion zur Anzeige der Nachricht
-  function showMessage(message, type) {
-    const messageContainer = document.getElementById("nachricht");
-    messageContainer.textContent = message;
-    messageContainer.classList.add(type);
-    messageContainer.style.display = "block";
-
-    // Nachricht nach 3 Sekunden verschwinden lassen
-    setTimeout(() => {
-      messageContainer.style.display = "none";
-      messageContainer.classList.remove(type);
-    }, 3000);
-  }
-</script>
-
+  <!-- PayPal Zahlungs-Popup -->
+  <div
+    id="paypal-popup"
+    style="
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 20px;
+      border: 2px solid #333;
+      z-index: 1000;
+    "
+  >
+    <p>
+      Bitte öffne den PayPal-Link im Browser und nicht in der App, damit der
+      Betrag korrekt übernommen wird.
+    </p>
+    <button id="open-paypal">Jetzt bezahlen</button>
+    <button id="paid-confirmation" disabled>Ich habe bezahlt</button>
+    <button id="paypal-close">Abbrechen</button>
+  </div>
 
   <script src="script.js"></script>
-<!-- ... dein restlicher HTML-Code ... -->
-
-<!-- PayPal Zahlungs-Popup -->
-<div id="paypal-popup" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%);
-     background:#fff; padding:20px; border:2px solid #333; z-index:1000;">
-  <p>Bitte öffne den PayPal-Link im Browser und nicht in der App, damit der Betrag korrekt übernommen wird.</p>
-  <button id="open-paypal">Jetzt bezahlen</button>
-  <button id="paid-confirmation" disabled>Ich habe bezahlt</button>
-  <button id="paypal-close">Abbrechen</button>
-</div>
-
 </body>
-</html>
-
-</body>
-
-
 </html>
