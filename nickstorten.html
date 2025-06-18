@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <script src="https://www.paypal.com/sdk/js?client-id=AeS_1cBql0zQehIPmPHgQknt7ALiNilo0u7bs_Ed9ZeRzRKCIUU9pNoc2HwU3jSAi00odikxZPsGFdOD&currency=CHF"></script>
   <meta charset="UTF-8" />
   <title>Nicks Torten</title>
   <link rel="stylesheet" href="styler.css" />
@@ -96,11 +97,7 @@
   <div id="bestellformular" class="overlay" style="display:none;">
     <div class="popup-content">
       <h2>Bestellung abschließen</h2>
-      <form
-        action="https://formspree.io/f/xbloagqo"
-        method="POST"
-        id="bestell-form"
-      >
+      <form id="bestell-form">
         <label for="Vorname">Vorname:</label>
         <input type="text" id="Vorname" name="Vorname" required /><br /><br />
 
@@ -128,6 +125,9 @@
         <button type="button" id="bezahlen-btn" disabled>
           Bezahlen
         </button>
+
+        <div id="paypal-button-container" style="margin-top: 20px;"></div>
+        
         <input type="hidden" id="tortenliste" name="tortenliste" />
       </form>
 
@@ -137,30 +137,6 @@
 
   <!-- Erfolg/Fehler Nachricht -->
   <div id="nachricht" class="message" style="display: none;"></div>
-
-  <!-- PayPal Zahlungs-Popup -->
-  <div
-    id="paypal-popup"
-    style="
-      display: none;
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      padding: 20px;
-      border: 2px solid #333;
-      z-index: 1000;
-    "
-  >
-    <p>
-      Bitte öffne den PayPal-Link im Browser und nicht in der App, damit der
-      Betrag korrekt übernommen wird.
-    </p>
-    <button id="open-paypal">Jetzt bezahlen</button>
-    <button id="paid-confirmation" disabled>Ich habe bezahlt</button>
-    <button id="paypal-close">Abbrechen</button>
-  </div>
 
   <script src="script.js"></script>
 </body>
