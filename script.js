@@ -50,13 +50,13 @@ overlay.addEventListener('click', (e) => {
   if (e.target === overlay) overlay.style.display = 'none';
 });
 
+let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
+const bezahlenBtn = document.getElementById('bezahlen-btn');
 const warenkorbButton = document.getElementById('warenkorb-button');
 const warenkorbPopup = document.getElementById('warenkorb-popup');
 const warenkorbItems = document.getElementById('warenkorb-items');
 const warenkorbCount = document.getElementById('warenkorb-count');
 const gesamtpreis = document.getElementById('gesamtpreis');
-
-let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
 
 function updateWarenkorbAnzeige() {
   warenkorbItems.innerHTML = '';
@@ -74,7 +74,8 @@ function updateWarenkorbAnzeige() {
     mengeInput.value = item.menge;
     mengeInput.min = 1;
     mengeInput.onchange = () => {
-      item.menge = Math.max(1, parseInt(mengeInput.value));
+      const neueMenge = parseInt(mengeInput.value) || 1;
+      item.menge = Math.max(1, neueMenge);
       saveCart();
       updateWarenkorbAnzeige();
     };
@@ -100,6 +101,9 @@ function updateWarenkorbAnzeige() {
 
   // "Bezahlen"-Button aktivieren, wenn Warenkorb nicht leer
   bezahlenBtn.disabled = warenkorb.length === 0;
+  document.getElementById('bestellung-weiter').disabled = (warenkorb.length === 0 || summe === 0);
+
+  checkFormValidity();
 }
 
 function addToCart(torte) {
@@ -136,7 +140,6 @@ function closeBestellformular() {
 
 const bestellForm = document.getElementById('bestell-form');
 
-// Formular Validierung für Pflichtfelder
 function checkFormValidity() {
   const vorname = document.getElementById('Vorname').value.trim();
   const nachname = document.getElementById('Nachname').value.trim();
@@ -144,83 +147,93 @@ function checkFormValidity() {
   const telefon = document.getElementById('telefon').value.trim();
   const wunschdatum = document.getElementById('wunschdatum').value.trim();
   const ort = document.getElementById('ort').value.trim();
+  const strasse = document.getElementById('strasse').value.trim();
 
-  const valid = vorname && nachname && email && telefon && wunschdatum && ort && warenkorb.length > 0;
-  bezahlenBtn.disabled = !valid;
+  const allePflichtfelderAusgefuellt =
+      vorname && nachname && email && telefon && wunschdatum && ort && strasse;
+
+  const warenkorbNichtLeer = warenkorb.length > 0;
+  const gesamtbetrag = warenkorb.reduce((sum, item) => sum + item.preis * item.menge, 0);
+  const warenkorbGueltig = gesamtbetrag > 0;
+
+  bezahlenBtn.disabled = !(allePflichtfelderAusgefuellt && warenkorbNichtLeer && warenkorbGueltig);
 }
 
-// Listener auf Pflichtfelder
-['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort'].forEach(id => {
+['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort', 'strasse'].forEach(id => {
   document.getElementById(id).addEventListener('input', checkFormValidity);
 });
 
-const bestellungSendenBtn = document.getElementById('bestellung-senden');
-const bezahlenBtn = document.getElementById('bezahlen-btn');
-const paypalPopup = document.getElementById('paypal-popup');
-const paypalCloseBtn = document.getElementById('paypal-close-btn');
-const paidConfirmBtn = document.getElementById('paid-confirm-btn');
-const openPaypalBtn = document.getElementById('open-paypal-btn');
-let paypalLink = null;
-
-// "Bezahlen"-Button öffnet PayPal-Popup mit korrektem Betrag
 bezahlenBtn.addEventListener('click', () => {
+  document.getElementById('paypal-button-container').innerHTML = "";
+
   let summe = 0;
   warenkorb.forEach(item => {
     summe += item.preis * item.menge;
   });
 
-  paypalLink = `https://paypal.me/DeinPaypalName/${summe.toFixed(2)}`;
+  console.log("Warenkorb-Inhalt:", warenkorb);
+  console.log("Summe:", summe);
 
-  paypalPopup.style.display = 'flex';
-
-  // Button "Ich habe bezahlt" deaktivieren, bis PayPal-Seite geöffnet wurde
-  paidConfirmBtn.disabled = true;
-});
-
-// PayPal-Link in neuem Tab öffnen
-openPaypalBtn.addEventListener('click', () => {
-  if (paypalLink) {
-    const win = window.open(paypalLink, '_blank', 'noopener,noreferrer');
-    if (win) {
-      paidConfirmBtn.disabled = false; // Button freigeben, wenn PayPal geöffnet wurde
-    } else {
-      alert('Popup wurde blockiert. Bitte erlaube Popups für diese Seite.');
-    }
+  if (summe <= 0) {
+    showMessage("Warenkorb ist leer oder ungültig.", "error");
+    return;
   }
-});
 
-// PayPal-Popup schließen
-paypalCloseBtn.addEventListener('click', () => {
-  paypalPopup.style.display = 'none';
-});
+  paypal.Buttons({
+    createOrder: function (data, actions) {
+      console.log("Erstelle Bestellung mit:", summe.toFixed(2));
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            value: summe.toFixed(2),
+            currency_code: "CHF"
+          }
+        }]
+      });
+    },
+    onApprove: function (data, actions) {
+      return actions.order.capture().then(function (details) {
+        console.log("Zahlung erfolgreich:", details);
 
-// "Ich habe bezahlt"-Button: Bestellformular absenden, Popups schließen
-paidConfirmBtn.addEventListener('click', () => {
-  // Warenkorb-Details als Text zusammensetzen
-  let warenkorbDetails = "";
-  warenkorb.forEach(item => {
-    warenkorbDetails += `${item.name} (Menge: ${item.menge}), `;
-  });
-  warenkorbDetails = warenkorbDetails.slice(0, -2); // letztes Komma entfernen
+        const formData = new FormData(document.getElementById("bestell-form"));
+        const formObject = Object.fromEntries(formData.entries());
 
-  // In verstecktes Feld setzen (das Feld muss in deinem Formular vorhanden sein)
-  document.getElementById('tortenliste').value = warenkorbDetails;
+        const tortenText = warenkorb.map(item => `${item.name} (x${item.menge})`).join(", ");
+        formObject.tortenliste = tortenText;
 
-  // Formular absenden
-  bestellForm.submit();
+        fetch("https://formspree.io/f/xbloagqo", {
+          method: "POST",
+          headers: { "Accept": "application/json" },
+          body: new URLSearchParams({
+            ...formObject,
+            _replyto: formObject.email,
+            _cc: formObject.email,
+            _to: "nickgehrig@gmx.ch",
+            zusatzinfo: `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} ${details.purchase_units[0].amount.currency_code}, Artikel: ${tortenText}`
+          })
+        }).then(response => response.text().then(text => {
+          console.log("Formspree-Antwort:", text);
+          if (response.ok) {
+            showMessage("Herzlichen Dank für Ihren Einkauf!", "success");
+            resetWarenkorb();
+            setTimeout(() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 2000);
 
-  // Popups schließen
-  paypalPopup.style.display = 'none';
-  closeBestellformular();
-  closeWarenkorb();
-
-  // Warenkorb leeren
-  warenkorb = [];
-  saveCart();
-  updateWarenkorbAnzeige();
-
-  // Info anzeigen
-  showMessage("Bestellung erfolgreich abgeschickt. Vielen Dank!", "success");
+          } else {
+            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.", "error");
+          }
+        }));
+      });
+    },
+    onCancel: function () {
+      showMessage("Bezahlung abgebrochen.", "info");
+    },
+    onError: function (err) {
+      showMessage("Fehler bei der PayPal-Zahlung.", "error");
+      console.error("PayPal Fehler:", err);
+    }
+  }).render('#paypal-button-container');
 });
 
 // Formular direkt an Formspree senden (Alternative oder Backup, falls du das brauchst)
@@ -259,16 +272,34 @@ bestellForm.addEventListener('submit', function(event) {
     });
 });
 
-// Funktion zur Anzeige von Nachrichten (Erfolg, Fehler, Info)
-function showMessage(message, type) {
-  const messageContainer = document.createElement('div');
-  messageContainer.classList.add('message', type);  // z.B. 'success', 'error', 'info'
-  messageContainer.textContent = message;
-  document.body.appendChild(messageContainer);
+function showMessage(text, type = "success") {
+  const msg = document.getElementById("nachricht");
+  msg.innerText = text;
+  msg.className = `message ${type}`;
+  msg.style.display = "block";
 
-  setTimeout(() => messageContainer.remove(), 5000);
+  setTimeout(() => {
+    msg.style.display = "none";
+  }, 5000);
+}
+
+function resetWarenkorb() {
+  warenkorb = [];
+  localStorage.removeItem('warenkorb');
+  updateWarenkorbAnzeige();
+  closeWarenkorb();
+  closeBestellformular();
+  document.getElementById('paypal-button-container').innerHTML = '';
 }
 
 // Initiales Update und Formularvalidierung
 updateWarenkorbAnzeige();
 checkFormValidity();
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === "Escape") {
+    overlay.style.display = 'none';
+    closeWarenkorb();
+    closeBestellformular();
+  }
+});

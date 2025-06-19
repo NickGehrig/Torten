@@ -180,19 +180,18 @@ h1 {
   font-weight: bold;
   cursor: pointer;
 }
-/* Stil für die Bestätigungsmeldungen */
+
 .message {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #4CAF50;
-  color: white;
-  padding: 15px;
-  border-radius: 5px;
-  font-size: 16px;
   z-index: 9999;
-  display: none;
+  padding: 12px 20px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 6px;
+  font-weight: bold;
 }
 
 .message.success {
@@ -206,4 +205,11 @@ h1 {
 /* Damit die Nachricht nach 3 Sekunden erscheint */
 .message.show {
   display: block;
+}
+#warenkorb-items::-webkit-scrollbar {
+  width: 6px;
+}
+#warenkorb-items::-webkit-scrollbar-thumb {
+  background-color: #ff4d6d;
+  border-radius: 3px;
 }
