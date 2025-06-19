@@ -51,6 +51,7 @@ overlay.addEventListener('click', (e) => {
 });
 
 let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
+const bezahlenBtn = document.getElementById('bezahlen-btn');
 const warenkorbButton = document.getElementById('warenkorb-button');
 const warenkorbPopup = document.getElementById('warenkorb-popup');
 const warenkorbItems = document.getElementById('warenkorb-items');
@@ -73,7 +74,8 @@ function updateWarenkorbAnzeige() {
     mengeInput.value = item.menge;
     mengeInput.min = 1;
     mengeInput.onchange = () => {
-      item.menge = Math.max(1, parseInt(mengeInput.value));
+      const neueMenge = parseInt(mengeInput.value) || 1;
+      item.menge = Math.max(1, neueMenge);
       saveCart();
       updateWarenkorbAnzeige();
     };
@@ -99,6 +101,9 @@ function updateWarenkorbAnzeige() {
 
   // "Bezahlen"-Button aktivieren, wenn Warenkorb nicht leer
   bezahlenBtn.disabled = warenkorb.length === 0;
+  document.getElementById('bestellung-weiter').disabled = (warenkorb.length === 0 || summe === 0);
+
+  checkFormValidity();
 }
 
 function addToCart(torte) {
@@ -135,7 +140,6 @@ function closeBestellformular() {
 
 const bestellForm = document.getElementById('bestell-form');
 
-// Formular Validierung für Pflichtfelder
 function checkFormValidity() {
   const vorname = document.getElementById('Vorname').value.trim();
   const nachname = document.getElementById('Nachname').value.trim();
@@ -143,22 +147,25 @@ function checkFormValidity() {
   const telefon = document.getElementById('telefon').value.trim();
   const wunschdatum = document.getElementById('wunschdatum').value.trim();
   const ort = document.getElementById('ort').value.trim();
+  const strasse = document.getElementById('strasse').value.trim();
 
-  const valid = vorname && nachname && email && telefon && wunschdatum && ort && warenkorb.length > 0;
-  bezahlenBtn.disabled = !valid;
+  const allePflichtfelderAusgefuellt =
+      vorname && nachname && email && telefon && wunschdatum && ort && strasse;
+
+  const warenkorbNichtLeer = warenkorb.length > 0;
+  const gesamtbetrag = warenkorb.reduce((sum, item) => sum + item.preis * item.menge, 0);
+  const warenkorbGueltig = gesamtbetrag > 0;
+
+  bezahlenBtn.disabled = !(allePflichtfelderAusgefuellt && warenkorbNichtLeer && warenkorbGueltig);
 }
 
-// Listener auf Pflichtfelder
-['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort'].forEach(id => {
+['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort', 'strasse'].forEach(id => {
   document.getElementById(id).addEventListener('input', checkFormValidity);
 });
-
-const bezahlenBtn = document.getElementById('bezahlen-btn');
 
 bezahlenBtn.addEventListener('click', () => {
   document.getElementById('paypal-button-container').innerHTML = "";
 
-  const warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
   let summe = 0;
   warenkorb.forEach(item => {
     summe += item.preis * item.menge;
@@ -199,19 +206,24 @@ bezahlenBtn.addEventListener('click', () => {
           headers: { "Accept": "application/json" },
           body: new URLSearchParams({
             ...formObject,
-            _to: "nickgehrig@gmx.ch",
-            _cc: formObject.email, // Kopie an Käufer
             _replyto: formObject.email,
-            Nachricht: `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} ${details.purchase_units[0].amount.currency_code}, Artikel: ${tortenText}`
+            _cc: formObject.email,
+            _to: "nickgehrig@gmx.ch",
+            zusatzinfo: `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} ${details.purchase_units[0].amount.currency_code}, Artikel: ${tortenText}`
           })
-        }).then(response => {
+        }).then(response => response.text().then(text => {
+          console.log("Formspree-Antwort:", text);
           if (response.ok) {
-            showMessage("Herzlichen Dank für Ihren Einkauf!");
-            resetWarenkorb(); // Funktion, um Warenkorb zu leeren
+            showMessage("Herzlichen Dank für Ihren Einkauf!", "success");
+            resetWarenkorb();
+            setTimeout(() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 2000);
+
           } else {
-            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.");
+            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.", "error");
           }
-        });
+        }));
       });
     },
     onCancel: function () {
@@ -260,18 +272,15 @@ bestellForm.addEventListener('submit', function(event) {
     });
 });
 
-function showMessage(text) {
+function showMessage(text, type = "success") {
   const msg = document.getElementById("nachricht");
   msg.innerText = text;
+  msg.className = `message ${type}`;
   msg.style.display = "block";
-  msg.style.backgroundColor = "#d4edda"; // Grün
-  msg.style.color = "#155724";
-  msg.style.padding = "10px";
-  msg.style.border = "1px solid #c3e6cb";
 
   setTimeout(() => {
     msg.style.display = "none";
-  }, 8000);
+  }, 5000);
 }
 
 function resetWarenkorb() {
@@ -280,8 +289,17 @@ function resetWarenkorb() {
   updateWarenkorbAnzeige();
   closeWarenkorb();
   closeBestellformular();
+  document.getElementById('paypal-button-container').innerHTML = '';
 }
 
 // Initiales Update und Formularvalidierung
 updateWarenkorbAnzeige();
 checkFormValidity();
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === "Escape") {
+    overlay.style.display = 'none';
+    closeWarenkorb();
+    closeBestellformular();
+  }
+});

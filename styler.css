@@ -206,3 +206,10 @@ h1 {
 .message.show {
   display: block;
 }
+#warenkorb-items::-webkit-scrollbar {
+  width: 6px;
+}
+#warenkorb-items::-webkit-scrollbar-thumb {
+  background-color: #ff4d6d;
+  border-radius: 3px;
+}
