@@ -15,6 +15,61 @@ const bezahlenBtn = document.getElementById('bezahlen-btn');
 
 const bestellForm = document.getElementById('bestell-form');
 
+// --- Zeitfenster selbst definieren ---
+const availableSlots = [
+  "28.06.2025 10:00",
+  "28.06.2025 13:00",
+  "29.06.2025 10:00",
+  "29.06.2025 13:00",
+];
+
+
+const timeSlotSelect = document.getElementById('wunschdatum');
+let bookedSlots = JSON.parse(localStorage.getItem('bookedSlots')) || [];
+
+
+function populateTimeSlots() {
+  const now = new Date();
+  timeSlotSelect.innerHTML = '<option value="">Bitte wählen</option>'; // Dropdown zurücksetzen
+
+  availableSlots.forEach(slot => {
+    if (bookedSlots.includes(slot)) return; // Slot überspringen, wenn schon gebucht
+
+    const [dateStr, timeStr] = slot.split(" ");
+    const [day, month, year] = dateStr.split(".").map(Number);
+    const [hour, minute] = timeStr.split(":").map(Number);
+    const slotDate = new Date(year, month - 1, day, hour, minute);
+
+    if (slotDate > now) {
+      const option = document.createElement('option');
+      option.value = slot;
+      option.textContent = `${slotDate.toLocaleDateString('de-DE')} ${timeStr}`;
+      timeSlotSelect.appendChild(option);
+    }
+  });
+}
+function cleanOldBookedSlots() {
+  const now = new Date();
+  bookedSlots = bookedSlots.filter(slot => {
+    const [dateStr, timeStr] = slot.split(" ");
+    const [day, month, year] = dateStr.split(".").map(Number);
+    const [hour, minute] = timeStr.split(":").map(Number);
+    const slotDate = new Date(year, month - 1, day, hour, minute);
+
+    const timeDiff = slotDate.getTime() - now.getTime();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    return timeDiff >= oneDay; // Behalte nur Slots, die mind. 24h entfernt sind
+  });
+
+  localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
+}
+cleanOldBookedSlots();
+populateTimeSlots();
+
+
+
+
 let selectedTorte = null;
 let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
 
@@ -138,7 +193,6 @@ function closeBestellformular() {
   document.getElementById('bestellformular').style.display = 'none';
 }
 
-// Formularvalidierung (gibt true/false zurück)
 function checkFormValidity() {
   const vorname = document.getElementById('Vorname').value.trim();
   const nachname = document.getElementById('Nachname').value.trim();
@@ -146,18 +200,27 @@ function checkFormValidity() {
   const telefon = document.getElementById('telefon').value.trim();
   const wunschdatum = document.getElementById('wunschdatum').value.trim();
   const ort = document.getElementById('ort').value.trim();
+  const alternativtermin = document.getElementById('alternativtermin').value.trim();
 
-  const valid = vorname && nachname && email && telefon && wunschdatum && ort && warenkorb.length > 0;
+  // Pflichtfelder außer wunschdatum + alternativtermin
+  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && warenkorb.length > 0;
+
+  // Zeitfenster-Auswahl ODER Alternativfeld muss ausgefüllt sein
+  const zeitOderAlternativ = (wunschdatum !== '') 
+
+  const valid = pflichtfelderGefüllt && zeitOderAlternativ;
+
   bezahlenBtn.disabled = !valid;
   return valid;
 }
 
-// Listener auf Pflichtfelder zur Validierung
-['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort'].forEach(id => {
+
+['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'alternativtermin', 'ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     checkFormValidity();
   });
 });
+
 
 // PayPal-Bezahlbutton initialisieren und Aktionen definieren
 bezahlenBtn.addEventListener('click', () => {
@@ -202,12 +265,21 @@ bezahlenBtn.addEventListener('click', () => {
             Nachricht: `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} ${details.purchase_units[0].amount.currency_code}, Artikel: ${tortenText}`
           })
         }).then(response => {
-          if (response.ok) {
-            showMessage("Herzlichen Dank für Ihren Einkauf!");
-            resetWarenkorb();
-          } else {
-            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.");
-          }
+        if (response.ok) {
+        showMessage("Herzlichen Dank für Ihren Einkauf!");
+  
+        const gewaehlterSlot = document.getElementById('wunschdatum').value;
+        if (gewaehlterSlot && !bookedSlots.includes(gewaehlterSlot)) {
+         bookedSlots.push(gewaehlterSlot);
+        localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
+       populateTimeSlots();
+       }
+  
+  resetWarenkorb();
+} else {
+  showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.");
+}
+
         });
       });
     },
@@ -278,18 +350,22 @@ function showMessage(text, type = "info") {
 
   setTimeout(() => {
     msg.style.display = "none";
-  }, 8000);
+  }, 6000);
 }
 
-// Warenkorb zurücksetzen
 function resetWarenkorb() {
   warenkorb = [];
-  localStorage.removeItem('warenkorb');
+  saveCart();
   updateWarenkorbAnzeige();
-  closeWarenkorb();
-  closeBestellformular();
+  document.getElementById('bestell-form').reset();
 }
 
-// Initiales Update und Formularvalidierung
-updateWarenkorbAnzeige();
-checkFormValidity();
+// Popup schließen, wenn man außerhalb klickt (Optional)
+window.onclick = function(event) {
+  if (event.target === warenkorbPopup) {
+    warenkorbPopup.style.display = "none";
+  }
+  if (event.target === overlay) {
+    overlay.style.display = "none";
+  }
+};
