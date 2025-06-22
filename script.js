@@ -6,8 +6,19 @@ const info = document.getElementById('lightbox-info');
 const preis = document.getElementById('lightbox-preis');
 const closeBtn = document.getElementById('closeBtn');
 
-let selectedTorte = null;
+const warenkorbButton = document.getElementById('warenkorb-button');
+const warenkorbPopup = document.getElementById('warenkorb-popup');
+const warenkorbItems = document.getElementById('warenkorb-items');
+const warenkorbCount = document.getElementById('warenkorb-count');
+const gesamtpreis = document.getElementById('gesamtpreis');
+const bezahlenBtn = document.getElementById('bezahlen-btn');
 
+const bestellForm = document.getElementById('bestell-form');
+
+let selectedTorte = null;
+let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
+
+// Lightbox öffnen beim Klick auf eine Torte
 torten.forEach(torte => {
   torte.addEventListener('click', () => {
     selectedTorte = {
@@ -21,7 +32,6 @@ torten.forEach(torte => {
     preis.textContent = `Preis: ${torte.dataset.preis} Fr.`;
     overlay.style.display = 'flex';
 
-    // Button nur einmal hinzufügen
     if (!document.getElementById('add-to-cart')) {
       const addButton = document.createElement('button');
       addButton.textContent = 'Zum Warenkorb hinzufügen';
@@ -42,22 +52,21 @@ torten.forEach(torte => {
   });
 });
 
+// Lightbox schließen
 closeBtn.addEventListener('click', () => {
   overlay.style.display = 'none';
 });
-
 overlay.addEventListener('click', (e) => {
   if (e.target === overlay) overlay.style.display = 'none';
 });
 
-let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
-const bezahlenBtn = document.getElementById('bezahlen-btn');
-const warenkorbButton = document.getElementById('warenkorb-button');
-const warenkorbPopup = document.getElementById('warenkorb-popup');
-const warenkorbItems = document.getElementById('warenkorb-items');
-const warenkorbCount = document.getElementById('warenkorb-count');
-const gesamtpreis = document.getElementById('gesamtpreis');
+// Warenkorb anzeigen
+warenkorbButton.onclick = () => {
+  updateWarenkorbAnzeige();
+  warenkorbPopup.style.display = 'flex';
+};
 
+// Warenkorb anzeigen und aktualisieren
 function updateWarenkorbAnzeige() {
   warenkorbItems.innerHTML = '';
   let summe = 0;
@@ -74,8 +83,7 @@ function updateWarenkorbAnzeige() {
     mengeInput.value = item.menge;
     mengeInput.min = 1;
     mengeInput.onchange = () => {
-      const neueMenge = parseInt(mengeInput.value) || 1;
-      item.menge = Math.max(1, neueMenge);
+      item.menge = Math.max(1, parseInt(mengeInput.value) || 1);
       saveCart();
       updateWarenkorbAnzeige();
     };
@@ -99,11 +107,7 @@ function updateWarenkorbAnzeige() {
   gesamtpreis.textContent = `Gesamt: ${summe.toFixed(2)} Fr.`;
   warenkorbCount.textContent = warenkorb.reduce((a, b) => a + b.menge, 0);
 
-  // "Bezahlen"-Button aktivieren, wenn Warenkorb nicht leer
-  bezahlenBtn.disabled = warenkorb.length === 0;
-  document.getElementById('bestellung-weiter').disabled = (warenkorb.length === 0 || summe === 0);
-
-  checkFormValidity();
+  bezahlenBtn.disabled = warenkorb.length === 0 || !checkFormValidity();
 }
 
 function addToCart(torte) {
@@ -125,11 +129,7 @@ function closeWarenkorb() {
   warenkorbPopup.style.display = 'none';
 }
 
-warenkorbButton.onclick = () => {
-  updateWarenkorbAnzeige();
-  warenkorbPopup.style.display = 'flex';
-};
-
+// Bestellformular anzeigen
 document.getElementById('bestellung-weiter').onclick = () => {
   document.getElementById('bestellformular').style.display = 'flex';
 };
@@ -138,8 +138,7 @@ function closeBestellformular() {
   document.getElementById('bestellformular').style.display = 'none';
 }
 
-const bestellForm = document.getElementById('bestell-form');
-
+// Formularvalidierung (gibt true/false zurück)
 function checkFormValidity() {
   const vorname = document.getElementById('Vorname').value.trim();
   const nachname = document.getElementById('Nachname').value.trim();
@@ -147,22 +146,20 @@ function checkFormValidity() {
   const telefon = document.getElementById('telefon').value.trim();
   const wunschdatum = document.getElementById('wunschdatum').value.trim();
   const ort = document.getElementById('ort').value.trim();
-  const strasse = document.getElementById('strasse').value.trim();
 
-  const allePflichtfelderAusgefuellt =
-      vorname && nachname && email && telefon && wunschdatum && ort && strasse;
-
-  const warenkorbNichtLeer = warenkorb.length > 0;
-  const gesamtbetrag = warenkorb.reduce((sum, item) => sum + item.preis * item.menge, 0);
-  const warenkorbGueltig = gesamtbetrag > 0;
-
-  bezahlenBtn.disabled = !(allePflichtfelderAusgefuellt && warenkorbNichtLeer && warenkorbGueltig);
+  const valid = vorname && nachname && email && telefon && wunschdatum && ort && warenkorb.length > 0;
+  bezahlenBtn.disabled = !valid;
+  return valid;
 }
 
-['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort', 'strasse'].forEach(id => {
-  document.getElementById(id).addEventListener('input', checkFormValidity);
+// Listener auf Pflichtfelder zur Validierung
+['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'ort'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    checkFormValidity();
+  });
 });
 
+// PayPal-Bezahlbutton initialisieren und Aktionen definieren
 bezahlenBtn.addEventListener('click', () => {
   document.getElementById('paypal-button-container').innerHTML = "";
 
@@ -171,9 +168,6 @@ bezahlenBtn.addEventListener('click', () => {
     summe += item.preis * item.menge;
   });
 
-  console.log("Warenkorb-Inhalt:", warenkorb);
-  console.log("Summe:", summe);
-
   if (summe <= 0) {
     showMessage("Warenkorb ist leer oder ungültig.", "error");
     return;
@@ -181,7 +175,6 @@ bezahlenBtn.addEventListener('click', () => {
 
   paypal.Buttons({
     createOrder: function (data, actions) {
-      console.log("Erstelle Bestellung mit:", summe.toFixed(2));
       return actions.order.create({
         purchase_units: [{
           amount: {
@@ -193,11 +186,8 @@ bezahlenBtn.addEventListener('click', () => {
     },
     onApprove: function (data, actions) {
       return actions.order.capture().then(function (details) {
-        console.log("Zahlung erfolgreich:", details);
-
-        const formData = new FormData(document.getElementById("bestell-form"));
+        const formData = new FormData(bestellForm);
         const formObject = Object.fromEntries(formData.entries());
-
         const tortenText = warenkorb.map(item => `${item.name} (x${item.menge})`).join(", ");
         formObject.tortenliste = tortenText;
 
@@ -206,24 +196,19 @@ bezahlenBtn.addEventListener('click', () => {
           headers: { "Accept": "application/json" },
           body: new URLSearchParams({
             ...formObject,
-            _replyto: formObject.email,
-            _cc: formObject.email,
             _to: "nickgehrig@gmx.ch",
-            zusatzinfo: `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} ${details.purchase_units[0].amount.currency_code}, Artikel: ${tortenText}`
+            _cc: formObject.email,
+            _replyto: formObject.email,
+            Nachricht: `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} ${details.purchase_units[0].amount.currency_code}, Artikel: ${tortenText}`
           })
-        }).then(response => response.text().then(text => {
-          console.log("Formspree-Antwort:", text);
+        }).then(response => {
           if (response.ok) {
-            showMessage("Herzlichen Dank für Ihren Einkauf!", "success");
+            showMessage("Herzlichen Dank für Ihren Einkauf!");
             resetWarenkorb();
-            setTimeout(() => {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 2000);
-
           } else {
-            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.", "error");
+            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.");
           }
-        }));
+        });
       });
     },
     onCancel: function () {
@@ -236,7 +221,7 @@ bezahlenBtn.addEventListener('click', () => {
   }).render('#paypal-button-container');
 });
 
-// Formular direkt an Formspree senden (Alternative oder Backup, falls du das brauchst)
+// Bestellformular absenden (Fallback)
 bestellForm.addEventListener('submit', function(event) {
   event.preventDefault();
   
@@ -244,7 +229,6 @@ bestellForm.addEventListener('submit', function(event) {
   
   const formData = new FormData(this);
 
-  // Warenkorb als String hinzufügen
   let warenkorbDetails = "";
   warenkorb.forEach(item => {
     warenkorbDetails += `${item.name} (Menge: ${item.menge}), `;
@@ -259,9 +243,7 @@ bestellForm.addEventListener('submit', function(event) {
     .then(data => {
       if (data.ok || data.success) {
         showMessage("Bestellung wurde erfolgreich gesendet! Vielen Dank.", "success");
-        warenkorb = [];
-        saveCart();
-        updateWarenkorbAnzeige();
+        resetWarenkorb();
         closeBestellformular();
         closeWarenkorb();
       } else {
@@ -272,34 +254,42 @@ bestellForm.addEventListener('submit', function(event) {
     });
 });
 
-function showMessage(text, type = "success") {
+// Meldung anzeigen
+function showMessage(text, type = "info") {
   const msg = document.getElementById("nachricht");
   msg.innerText = text;
-  msg.className = `message ${type}`;
   msg.style.display = "block";
+
+  if (type === "success") {
+    msg.style.backgroundColor = "#d4edda";
+    msg.style.color = "#155724";
+    msg.style.border = "1px solid #c3e6cb";
+  } else if (type === "error") {
+    msg.style.backgroundColor = "#f8d7da";
+    msg.style.color = "#721c24";
+    msg.style.border = "1px solid #f5c6cb";
+  } else { // info
+    msg.style.backgroundColor = "#d1ecf1";
+    msg.style.color = "#0c5460";
+    msg.style.border = "1px solid #bee5eb";
+  }
+
+  msg.style.padding = "10px";
 
   setTimeout(() => {
     msg.style.display = "none";
-  }, 5000);
+  }, 8000);
 }
 
+// Warenkorb zurücksetzen
 function resetWarenkorb() {
   warenkorb = [];
   localStorage.removeItem('warenkorb');
   updateWarenkorbAnzeige();
   closeWarenkorb();
   closeBestellformular();
-  document.getElementById('paypal-button-container').innerHTML = '';
 }
 
 // Initiales Update und Formularvalidierung
 updateWarenkorbAnzeige();
 checkFormValidity();
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === "Escape") {
-    overlay.style.display = 'none';
-    closeWarenkorb();
-    closeBestellformular();
-  }
-});
