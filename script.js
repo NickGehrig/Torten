@@ -162,34 +162,41 @@ const paidConfirmBtn = document.getElementById('paid-confirm-btn');
 const openPaypalBtn = document.getElementById('open-paypal-btn');
 let paypalLink = null;
 
-// "Bezahlen"-Button öffnet PayPal-Popup mit korrektem Betrag
 bezahlenBtn.addEventListener('click', () => {
   let summe = 0;
   warenkorb.forEach(item => {
     summe += item.preis * item.menge;
   });
 
-  paypalLink = `https://paypal.me/DeinPaypalName/${summe.toFixed(2)}`;
+  paypalLink = `https://paypal.me/SteGehrig/${summe.toFixed(2)}`;
 
-  paypalPopup.style.display = 'flex';
+  // PayPal-Link in neuem Tab öffnen
+  const win = window.open(paypalLink, '_blank', 'noopener,noreferrer');
 
-  // Button "Ich habe bezahlt" deaktivieren, bis PayPal-Seite geöffnet wurde
-  paidConfirmBtn.disabled = true;
-});
+  if (win) {
+    // Button "Ich habe bezahlt" verstecken und deaktivieren bis der Tab geschlossen wird
+    paidConfirmBtn.disabled = true;
+    paidConfirmBtn.style.display = 'none';
 
-// PayPal-Link in neuem Tab öffnen
-openPaypalBtn.addEventListener('click', () => {
-  if (paypalLink) {
-    const win = window.open(paypalLink, '_blank', 'noopener,noreferrer');
-    if (win) {
-      paidConfirmBtn.disabled = false; // Button freigeben, wenn PayPal geöffnet wurde
-    } else {
-      alert('Popup wurde blockiert. Bitte erlaube Popups für diese Seite.');
-    }
+    // Prüfen, ob das PayPal-Fenster geschlossen wurde
+    const timer = setInterval(() => {
+      if (win.closed) {
+        clearInterval(timer);
+        // PayPal-Tab geschlossen -> Button anzeigen und aktivieren
+        paidConfirmBtn.disabled = false;
+        paidConfirmBtn.style.display = 'inline-block';
+
+        // Info anzeigen
+        showMessage('Danke! Wenn Sie bezahlt haben, klicken Sie bitte auf "Ich habe bezahlt".', 'info');
+      }
+    }, 500);
+
+  } else {
+    alert('Popup wurde blockiert. Bitte erlaube Popups für diese Seite.');
   }
 });
 
-// PayPal-Popup schließen
+// PayPal-Popup schließen (falls du es benutzt)
 paypalCloseBtn.addEventListener('click', () => {
   paypalPopup.style.display = 'none';
 });
@@ -269,6 +276,6 @@ function showMessage(message, type) {
   setTimeout(() => messageContainer.remove(), 5000);
 }
 
-// Initiales Update und Formularvalidierung
+// Initiales Update und Formularvalidierung starten
 updateWarenkorbAnzeige();
 checkFormValidity();
