@@ -276,7 +276,12 @@ bezahlenBtn.addEventListener('click', () => {
        }
   
   resetWarenkorb();
-} else {
+          closeWarenkorb();
+          closeBestellformular();
+          overlay.style.display = 'none';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        } else {
   showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.");
 }
 
