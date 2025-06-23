@@ -17,6 +17,7 @@ const bestellForm = document.getElementById('bestell-form');
 
 // --- Zeitfenster selbst definieren ---
 const availableSlots = [
+  "26.06.2025 13:00",
   "28.06.2025 10:00",
   "28.06.2025 13:00",
   "29.06.2025 10:00",
