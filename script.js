@@ -15,62 +15,6 @@ const bezahlenBtn = document.getElementById('bezahlen-btn');
 
 const bestellForm = document.getElementById('bestell-form');
 
-// --- Zeitfenster selbst definieren ---
-const availableSlots = [
-  "11.08.2025 14:00",
-  "13.08.2025 10:00",
-  "28.06.2025 13:00",
-  "29.06.2025 10:00",
-  "29.06.2025 13:00",
-];
-
-
-const timeSlotSelect = document.getElementById('wunschdatum');
-let bookedSlots = JSON.parse(localStorage.getItem('bookedSlots')) || [];
-
-
-function populateTimeSlots() {
-  const now = new Date();
-  timeSlotSelect.innerHTML = '<option value="">Bitte wählen</option>'; // Dropdown zurücksetzen
-
-  availableSlots.forEach(slot => {
-    if (bookedSlots.includes(slot)) return; // Slot überspringen, wenn schon gebucht
-
-    const [dateStr, timeStr] = slot.split(" ");
-    const [day, month, year] = dateStr.split(".").map(Number);
-    const [hour, minute] = timeStr.split(":").map(Number);
-    const slotDate = new Date(year, month - 1, day, hour, minute);
-
-    if (slotDate > now) {
-      const option = document.createElement('option');
-      option.value = slot;
-      option.textContent = `${slotDate.toLocaleDateString('de-DE')} ${timeStr}`;
-      timeSlotSelect.appendChild(option);
-    }
-  });
-}
-function cleanOldBookedSlots() {
-  const now = new Date();
-  bookedSlots = bookedSlots.filter(slot => {
-    const [dateStr, timeStr] = slot.split(" ");
-    const [day, month, year] = dateStr.split(".").map(Number);
-    const [hour, minute] = timeStr.split(":").map(Number);
-    const slotDate = new Date(year, month - 1, day, hour, minute);
-
-    const timeDiff = slotDate.getTime() - now.getTime();
-    const oneDay = 24 * 60 * 60 * 1000;
-
-    return timeDiff >= oneDay; // Behalte nur Slots, die mind. 24h entfernt sind
-  });
-
-  localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
-}
-cleanOldBookedSlots();
-populateTimeSlots();
-
-
-
-
 let selectedTorte = null;
 let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
 
@@ -199,15 +143,15 @@ function checkFormValidity() {
   const nachname = document.getElementById('Nachname').value.trim();
   const email = document.getElementById('email').value.trim();
   const telefon = document.getElementById('telefon').value.trim();
-  const wunschdatum = document.getElementById('wunschdatum').value.trim();
+const zeitwunsch = document.getElementById('zeitwunsch').value.trim();
   const ort = document.getElementById('ort').value.trim();
   const alternativtermin = document.getElementById('alternativtermin').value.trim();
 
   // Pflichtfelder außer wunschdatum + alternativtermin
   const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && warenkorb.length > 0;
 
-  // Zeitfenster-Auswahl ODER Alternativfeld muss ausgefüllt sein
-  const zeitOderAlternativ = (wunschdatum !== '') 
+
+  const zeitOderAlternativ = (zeitwunsch !== '')
 
   const valid = pflichtfelderGefüllt && zeitOderAlternativ;
 
@@ -216,7 +160,7 @@ function checkFormValidity() {
 }
 
 
-['Vorname', 'Nachname', 'email', 'telefon', 'wunschdatum', 'alternativtermin', 'ort'].forEach(id => {
+['Vorname', 'Nachname', 'email', 'telefon', 'zeitwunsch', 'alternativtermin', 'ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     checkFormValidity();
   });

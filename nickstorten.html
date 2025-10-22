@@ -112,17 +112,11 @@
         <label for="telefon">Telefonnummer*:</label>
         <input type="tel" id="telefon" name="telefon" required /><br /><br />
 
-        <label for="wunschdatum">Wunschzeitfenster*:</label>
-        <select id="wunschdatum" name="wunschdatum" required>
-          <option value="" disabled selected>Bitte wählen</option>
-          <!-- Zeitfenster werden per JavaScript eingefügt -->
-        </select>
-        <br /><br />
-        
-        <label for="alternativtermin">Alternativer Termin (falls kein Slot passt) Bitte gib noch ein slot an falls dein Wunschdatum nicht geht 
-                    :</label>
-        <input type="text" id="alternativtermin" name="alternativtermin" placeholder="z.B. 20.07.2025, 15 Uhr" />
-        <br /><br />
+<label for="zeitvon">Zeitfenster von*:</label>
+<input type="text" id="zeitvon" name="zeitvon" placeholder="z.B. 14:00" required><br><br>
+
+<label for="zeitbis">bis*:</label>
+<input type="text" id="zeitbis" name="zeitbis" placeholder="z.B. 17:00" required><br><br>
 
 
         <label for="ort">Lieferort*:</label>
