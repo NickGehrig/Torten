@@ -149,17 +149,18 @@ function checkFormValidity() {
   const email = document.getElementById('email').value.trim();
   const telefon = document.getElementById('telefon').value.trim();
   const ort = document.getElementById('ort').value.trim();
-
   const datum = document.getElementById('datum').value;
   const zeitvon = document.getElementById('zeitvon').value;
   const zeitbis = document.getElementById('zeitbis').value;
 
   let zeitValid = false;
-  if(zeitvon && zeitbis) {
-    const start = new Date(`1970-01-01T${zeitvon}:00`);
-    const ende = new Date(`1970-01-01T${zeitbis}:00`);
-    const diffStunden = (ende - start) / 1000 / 60 / 60; // Differenz in Stunden
-    zeitValid = diffStunden >= 4;
+  if(zeitvon && zeitbis){
+      const start = new Date(`1970-01-01T${zeitvon}:00`);
+      const ende = new Date(`1970-01-01T${zeitbis}:00`);
+      if(!isNaN(start.getTime()) && !isNaN(ende.getTime())){
+          const diffStunden = (ende - start) / 1000 / 60 / 60;
+          zeitValid = diffStunden >= 4;
+      }
   }
 
   const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && datum && warenkorb.length > 0;
@@ -167,7 +168,8 @@ function checkFormValidity() {
 
   bezahlenBtn.disabled = !valid;
   return valid;
-}
+} // <-- diese schließende Klammer fehlte
+
 
 // Listener für Datum und Zeit
 ['Vorname','Nachname','email','telefon','datum','zeitvon','zeitbis','ort'].forEach(id => {
