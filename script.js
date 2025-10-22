@@ -1,4 +1,3 @@
-// ---------- ELEMENTE ----------
 const torten = document.querySelectorAll('.torte');
 const overlay = document.getElementById('lightbox');
 const img = document.getElementById('lightbox-img');
@@ -15,32 +14,35 @@ const gesamtpreis = document.getElementById('gesamtpreis');
 const bezahlenBtn = document.getElementById('bezahlen-btn');
 
 const bestellForm = document.getElementById('bestell-form');
-const bestellungWeiterBtn = document.getElementById('bestellung-weiter');
-const bestellformularDiv = document.getElementById('bestellformular');
 
 let selectedTorte = null;
 let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
 
-// ---------- LIGHTBOX ----------
+// Lightbox öffnen
 torten.forEach(torte => {
     torte.addEventListener('click', () => {
         selectedTorte = {
             name: torte.dataset.name,
             preis: parseFloat(torte.dataset.preis),
-            img: torte.dataset.img,
-            info: torte.dataset.info
+            img: torte.dataset.img
         };
         img.src = selectedTorte.img;
         title.textContent = selectedTorte.name;
-        info.textContent = selectedTorte.info;
-        preis.textContent = `Preis: ${selectedTorte.preis} Fr.`;
+        info.textContent = torte.dataset.info;
+        preis.textContent = `Preis: ${torte.dataset.preis} Fr.`;
         overlay.style.display = 'flex';
 
         let addButton = document.getElementById('add-to-cart');
-        if(!addButton){
+        if (!addButton) {
             addButton = document.createElement('button');
             addButton.id = 'add-to-cart';
-            addButton.classList.add('add-to-cart-button');
+            addButton.style.marginTop = '20px';
+            addButton.style.padding = '10px 20px';
+            addButton.style.backgroundColor = '#d6336c';
+            addButton.style.color = 'white';
+            addButton.style.border = 'none';
+            addButton.style.borderRadius = '10px';
+            addButton.style.cursor = 'pointer';
             document.querySelector('.lightbox-content').appendChild(addButton);
         }
         addButton.textContent = 'Zum Warenkorb hinzufügen';
@@ -55,10 +57,8 @@ torten.forEach(torte => {
 closeBtn.addEventListener('click', () => overlay.style.display = 'none');
 overlay.addEventListener('click', e => { if(e.target === overlay) overlay.style.display = 'none'; });
 
-// ---------- WARENKORB ----------
-warenkorbButton.addEventListener('click', openWarenkorb);
-
-function openWarenkorb() {
+// Warenkorb öffnen
+warenkorbButton.addEventListener('click', () => {
     updateWarenkorbAnzeige();
     warenkorbPopup.style.display = 'flex';
     warenkorbPopup.style.position = 'fixed';
@@ -66,18 +66,20 @@ function openWarenkorb() {
     warenkorbPopup.style.left = '50%';
     warenkorbPopup.style.transform = 'translate(-50%, -50%)';
     warenkorbPopup.style.zIndex = '9999';
-}
+});
 
+// Warenkorb schließen
 function closeWarenkorb() {
     warenkorbPopup.style.display = 'none';
 }
 
+// Warenkorb aktualisieren
 function updateWarenkorbAnzeige() {
-    if(!warenkorbItems) return;
+    if (!warenkorbItems) return;
     warenkorbItems.innerHTML = '';
     let summe = 0;
 
-    if(warenkorb.length === 0){
+    if (warenkorb.length === 0) {
         warenkorbItems.textContent = "Dein Warenkorb ist leer.";
     }
 
@@ -101,7 +103,7 @@ function updateWarenkorbAnzeige() {
         const remove = document.createElement('button');
         remove.textContent = '🗑️';
         remove.onclick = () => {
-            warenkorb.splice(index,1);
+            warenkorb.splice(index, 1);
             saveCart();
             updateWarenkorbAnzeige();
         };
@@ -116,11 +118,11 @@ function updateWarenkorbAnzeige() {
 
     gesamtpreis.textContent = `Gesamt: ${summe.toFixed(2)} Fr.`;
     warenkorbCount.textContent = warenkorb.reduce((a,b)=>a+b.menge,0);
-    bezahlenBtn.disabled = warenkorb.length === 0 || !checkFormValidity();
+    checkFormValidity();
 }
 
-// ---------- WARENKORB FUNKTIONEN ----------
-function addToCart(torte){
+// Artikel hinzufügen
+function addToCart(torte) {
     const existing = warenkorb.find(item => item.name === torte.name);
     if(existing) existing.menge += 1;
     else warenkorb.push({...torte, menge:1});
@@ -128,22 +130,23 @@ function addToCart(torte){
     updateWarenkorbAnzeige();
 }
 
-function saveCart(){
+// Warenkorb speichern
+function saveCart() {
     localStorage.setItem('warenkorb', JSON.stringify(warenkorb));
 }
 
-// ---------- BESTELLFORMULAR ----------
-bestellungWeiterBtn.addEventListener('click', () => {
+// Bestellformular öffnen
+document.getElementById('bestellung-weiter').onclick = () => {
     closeWarenkorb();
-    bestellformularDiv.style.display = 'flex';
-});
+    document.getElementById('bestellformular').style.display = 'flex';
+};
 
-function closeBestellformular(){
-    bestellformularDiv.style.display = 'none';
+function closeBestellformular() {
+    document.getElementById('bestellformular').style.display = 'none';
 }
 
-// ---------- PRÜFUNG PFLICHTFELDER + 4h ----------
-function checkFormValidity(){
+// Pflichtfelder & Zeitprüfung
+function checkFormValidity() {
     const vorname = document.getElementById('Vorname').value.trim();
     const nachname = document.getElementById('Nachname').value.trim();
     const email = document.getElementById('email').value.trim();
@@ -158,90 +161,97 @@ function checkFormValidity(){
         const start = new Date(`1970-01-01T${zeitvon}:00`);
         const ende = new Date(`1970-01-01T${zeitbis}:00`);
         if(!isNaN(start.getTime()) && !isNaN(ende.getTime())){
-            zeitValid = (ende - start)/1000/60/60 >= 4;
+            const diff = (ende-start)/1000/60/60;
+            zeitValid = diff >=4;
         }
     }
 
-    const pflichtfelder = vorname && nachname && email && telefon && ort && datum && warenkorb.length>0;
-    const valid = pflichtfelder && zeitValid;
+    const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && datum && warenkorb.length>0;
+    const valid = pflichtfelderGefüllt && zeitValid;
 
     bezahlenBtn.disabled = !valid;
     return valid;
 }
 
-['Vorname','Nachname','email','telefon','datum','zeitvon','zeitbis','ort'].forEach(id => {
+// Listener für Eingaben
+['Vorname','Nachname','email','telefon','datum','zeitvon','zeitbis','ort'].forEach(id=>{
     document.getElementById(id).addEventListener('input', checkFormValidity);
 });
 
-// ---------- PAYPAL ----------
-bezahlenBtn.addEventListener('click', () => {
-    document.getElementById('paypal-button-container').innerHTML = "";
+// PayPal
+bezahlenBtn.addEventListener('click', ()=>{
+    if(bezahlenBtn.disabled) return;
     const summe = warenkorb.reduce((a,b)=>a+b.preis*b.menge,0);
-    if(summe<=0){ showMessage("Warenkorb leer oder ungültig","error"); return; }
+    if(summe<=0){ showMessage("Warenkorb leer","error"); return; }
+
+    const container = document.getElementById('paypal-button-container');
+    container.innerHTML = "";
 
     paypal.Buttons({
-        createOrder:(data,actions)=>actions.order.create({
-            purchase_units:[{amount:{value:summe.toFixed(2),currency_code:"CHF"}}]
-        }),
-        onApprove:(data,actions)=>actions.order.capture().then(details=>{ sendBestellung(details); }),
-        onCancel:()=>showMessage("Bezahlung abgebrochen","info"),
-        onError:(err)=>{ showMessage("PayPal Fehler","error"); console.error(err);}
+        createOrder: (data, actions)=>{
+            return actions.order.create({purchase_units:[{amount:{value:summe.toFixed(2),currency_code:"CHF"}}]});
+        },
+        onApprove: (data, actions)=>{
+            return actions.order.capture().then(details=>{
+                sendBestellung(details);
+            });
+        },
+        onCancel: ()=>showMessage("Bezahlung abgebrochen","info"),
+        onError: err=>{ showMessage("PayPal-Fehler","error"); console.error(err);}
     }).render('#paypal-button-container');
 });
 
-// ---------- BESTELLUNG SENDEN ----------
-function sendBestellung(details=null){
+// Bestellung senden
+function sendBestellung(paypalDetails=null){
     const formData = new FormData(bestellForm);
     formData.append("zeitVon", document.getElementById('zeitvon').value);
     formData.append("zeitBis", document.getElementById('zeitbis').value);
 
-    const formObj = Object.fromEntries(formData.entries());
-    const tortenText = warenkorb.map(i=>`${i.name} (x${i.menge})`).join(", ");
-    formObj.tortenliste = tortenText;
-
-    if(details){
-        formObj.Nachricht = `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} CHF, Artikel: ${tortenText}`;
+    let tortenText = warenkorb.map(item=>`${item.name} (x${item.menge})`).join(", ");
+    if(paypalDetails){
+        formData.append("Nachricht", `Zahlung von ${paypalDetails.payer.name.given_name} ${paypalDetails.payer.name.surname}, Betrag: ${paypalDetails.purchase_units[0].amount.value} CHF, Artikel: ${tortenText}`);
     }
 
     fetch("https://formspree.io/f/xbloagqo",{
         method:"POST",
-        headers:{"Accept":"application/json"},
-        body:new URLSearchParams(formObj)
-    }).then(res=>{
-        if(res.ok){
-            showMessage("Bestellung erfolgreich gesendet!","success");
+        body: formData,
+        headers: {'Accept':'application/json'}
+    }).then(response=>{
+        if(response.ok){
+            showMessage("Bestellung erfolgreich!","success");
             resetWarenkorb();
-            closeWarenkorb();
             closeBestellformular();
-        }else showMessage("Fehler beim Senden","error");
-    }).catch(()=>showMessage("Internet prüfen","error"));
+            overlay.style.display='none';
+            window.scrollTo({top:0,behavior:'smooth'});
+        } else {
+            showMessage("E-Mail konnte nicht gesendet werden","error");
+        }
+    }).catch(()=>showMessage("Netzwerkfehler","error"));
 }
 
-// ---------- MELDUNGEN ----------
+// Meldungen
 function showMessage(text,type="info"){
     const msg = document.getElementById("nachricht");
-    msg.innerText = text;
+    msg.innerText=text;
     msg.style.display='block';
-    msg.style.padding='10px';
-
-    if(type==="success"){ msg.style.background="#d4edda"; msg.style.color="#155724"; msg.style.border="1px solid #c3e6cb";}
-    else if(type==="error"){ msg.style.background="#f8d7da"; msg.style.color="#721c24"; msg.style.border="1px solid #f5c6cb";}
-    else{ msg.style.background="#d1ecf1"; msg.style.color="#0c5460"; msg.style.border="1px solid #bee5eb";}
-
+    msg.style.padding="10px";
+    if(type==="success"){msg.style.backgroundColor="#d4edda";msg.style.color="#155724";msg.style.border="1px solid #c3e6cb";}
+    else if(type==="error"){msg.style.backgroundColor="#f8d7da";msg.style.color="#721c24";msg.style.border="1px solid #f5c6cb";}
+    else{msg.style.backgroundColor="#d1ecf1";msg.style.color="#0c5460";msg.style.border="1px solid #bee5eb";}
     setTimeout(()=>{msg.style.display='none';},6000);
 }
 
-// ---------- WARENKORB RESET ----------
+// Warenkorb zurücksetzen
 function resetWarenkorb(){
-    warenkorb = [];
+    warenkorb=[];
     saveCart();
     updateWarenkorbAnzeige();
     closeWarenkorb();
     bestellForm.reset();
 }
 
-// ---------- POPUP SCHLIESSEN BEIM KLICK AUSSERHALB ----------
-window.addEventListener('click', e => {
-    if(e.target === warenkorbPopup) closeWarenkorb();
-    if(e.target === overlay) overlay.style.display='none';
-});
+// Klick außerhalb schließen
+window.onclick = function(event){
+    if(event.target===warenkorbPopup) closeWarenkorb();
+    if(event.target===overlay) overlay.style.display='none';
+};
