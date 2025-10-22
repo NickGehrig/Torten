@@ -149,22 +149,22 @@ function checkFormValidity() {
   const telefon = document.getElementById('telefon').value.trim();
   const ort = document.getElementById('ort').value.trim();
 
-  const datumvon = document.getElementById('datumvon').value.trim();
-  const datumbis = document.getElementById('datumbis').value.trim();
+  // richtige IDs benutzen
   const zeitvon = document.getElementById('zeitvon').value.trim();
   const zeitbis = document.getElementById('zeitbis').value.trim();
 
-  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && datumvon && datumbis && warenkorb.length > 0;
+  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && warenkorb.length > 0;
   const valid = pflichtfelderGefüllt && zeitvon && zeitbis;
 
   bezahlenBtn.disabled = !valid;
   return valid;
 }
 
-// Listener für alle Eingabefelder
-['Vorname','Nachname','email','telefon','datumvon','datumbis','zeitvon','zeitbis','ort'].forEach(id => {
+
+['Vorname','Nachname','email','telefon','zeitvon','zeitbis','ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', checkFormValidity);
 });
+
 
 // PayPal-Bezahlbutton
 bezahlenBtn.addEventListener('click', () => {
@@ -185,10 +185,14 @@ bezahlenBtn.addEventListener('click', () => {
     },
     onApprove: (data, actions) => {
       return actions.order.capture().then(details => {
-        const formData = new FormData(bestellForm);
-        const formObject = Object.fromEntries(formData.entries());
-        const tortenText = warenkorb.map(item => `${item.name} (x${item.menge})`).join(", ");
-        formObject.tortenliste = tortenText;
+       const formData = new FormData(bestellForm);
+const formObject = Object.fromEntries(formData.entries());
+const tortenText = warenkorb.map(item => `${item.name} (x${item.menge})`).join(", ");
+formObject.tortenliste = tortenText;
+
+// Datum von und bis hinzufügen
+formObject.zeitVon = document.getElementById('zeitvon').value;
+formObject.zeitBis = document.getElementById('zeitbis').value;
 
         fetch("https://formspree.io/f/xbloagqo", {
           method:"POST",
@@ -225,9 +229,8 @@ bestellForm.addEventListener('submit', event => {
   showMessage("Bestellung wird gesendet...", "info");
 
   const formData = new FormData(bestellForm);
-  let warenkorbDetails = "";
-  warenkorb.forEach(item => { warenkorbDetails += `${item.name} (Menge: ${item.menge}), `; });
-  formData.append("warenkorb", warenkorbDetails.slice(0,-2));
+formData.append("zeitVon", document.getElementById('zeitvon').value);
+formData.append("zeitBis", document.getElementById('zeitbis').value);
 
   fetch("https://formspree.io/f/xbloagqo", {
     method:"POST",
