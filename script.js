@@ -178,16 +178,15 @@ function checkFormValidity() {
     document.getElementById(id).addEventListener('input', checkFormValidity);
 });
 
-// PayPal
+// Direkt PayPal / Karte beim Klicken
 bezahlenBtn.addEventListener('click', ()=>{
     if(bezahlenBtn.disabled) return;
+
     const summe = warenkorb.reduce((a,b)=>a+b.preis*b.menge,0);
     if(summe<=0){ showMessage("Warenkorb leer","error"); return; }
 
-    const container = document.getElementById('paypal-button-container');
-    container.innerHTML = "";
-
     paypal.Buttons({
+        style: {layout:'vertical', color:'gold', shape:'rect', label:'paypal'},
         createOrder: (data, actions)=>{
             return actions.order.create({purchase_units:[{amount:{value:summe.toFixed(2),currency_code:"CHF"}}]});
         },
@@ -232,26 +231,28 @@ function sendBestellung(paypalDetails=null){
 // Meldungen
 function showMessage(text,type="info"){
     const msg = document.getElementById("nachricht");
-    msg.innerText=text;
-    msg.style.display='block';
-    msg.style.padding="10px";
-    if(type==="success"){msg.style.backgroundColor="#d4edda";msg.style.color="#155724";msg.style.border="1px solid #c3e6cb";}
-    else if(type==="error"){msg.style.backgroundColor="#f8d7da";msg.style.color="#721c24";msg.style.border="1px solid #f5c6cb";}
-    else{msg.style.backgroundColor="#d1ecf1";msg.style.color="#0c5460";msg.style.border="1px solid #bee5eb";}
-    setTimeout(()=>{msg.style.display='none';},6000);
+    msg.innerText = text;
+    msg.style.display = 'block';
+    msg.style.padding = "10px";
+
+    if(type==="success"){ msg.style.backgroundColor="#d4edda"; msg.style.color="#155724"; msg.style.border="1px solid #c3e6cb";}
+    else if(type==="error"){ msg.style.backgroundColor="#f8d7da"; msg.style.color="#721c24"; msg.style.border="1px solid #f5c6cb";}
+    else{ msg.style.backgroundColor="#d1ecf1"; msg.style.color="#0c5460"; msg.style.border="1px solid #bee5eb";}
+
+    setTimeout(()=>{msg.style.display="none";},6000);
 }
 
 // Warenkorb zurücksetzen
 function resetWarenkorb(){
-    warenkorb=[];
+    warenkorb = [];
     saveCart();
     updateWarenkorbAnzeige();
     closeWarenkorb();
     bestellForm.reset();
 }
 
-// Klick außerhalb schließen
+// Popup schließen beim Klick außerhalb
 window.onclick = function(event){
-    if(event.target===warenkorbPopup) closeWarenkorb();
-    if(event.target===overlay) overlay.style.display='none';
+    if(event.target === warenkorbPopup) closeWarenkorb();
+    if(event.target === overlay) overlay.style.display='none';
 };
