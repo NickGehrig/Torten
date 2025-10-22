@@ -113,15 +113,17 @@
         <input type="tel" id="telefon" name="telefon" required /><br /><br />
 
 <div class="datum-zeit">
-  <div class="datum-einzel">
-    <label for="zeitvon">Datum von:</label>
-    <input type="date" id="zeitvon" name="zeitvon" required>
-  </div>
-  <div class="datum-einzel">
-    <label for="zeitbis">Datum bis:</label>
-    <input type="date" id="zeitbis" name="zeitbis" required>
-  </div>
+  <label for="datum">Datum*:</label>
+  <input type="date" id="datum" name="datum" required><br><br>
+
+  <label for="zeitvon">Startzeit*:</label>
+  <input type="time" id="zeitvon" name="zeitvon" required>
+
+  <label for="zeitbis">Endzeit*:</label>
+  <input type="time" id="zeitbis" name="zeitbis" required>
+  <p style="font-size:0.9em; color:gray;">Endzeit muss mindestens 4 Stunden nach Startzeit sein.</p>
 </div>
+
 
 
         <label for="ort">Lieferort*:</label>

@@ -149,21 +149,30 @@ function checkFormValidity() {
   const telefon = document.getElementById('telefon').value.trim();
   const ort = document.getElementById('ort').value.trim();
 
-  // richtige IDs benutzen
-  const zeitvon = document.getElementById('zeitvon').value.trim();
-  const zeitbis = document.getElementById('zeitbis').value.trim();
+  const datum = document.getElementById('datum').value;
+  const zeitvon = document.getElementById('zeitvon').value;
+  const zeitbis = document.getElementById('zeitbis').value;
 
-  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && warenkorb.length > 0;
-  const valid = pflichtfelderGefüllt && zeitvon && zeitbis;
+  let zeitValid = false;
+  if(zeitvon && zeitbis) {
+    const start = new Date(`1970-01-01T${zeitvon}:00`);
+    const ende = new Date(`1970-01-01T${zeitbis}:00`);
+    const diffStunden = (ende - start) / 1000 / 60 / 60; // Differenz in Stunden
+    zeitValid = diffStunden >= 4;
+  }
+
+  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && datum && warenkorb.length > 0;
+  const valid = pflichtfelderGefüllt && zeitValid;
 
   bezahlenBtn.disabled = !valid;
   return valid;
 }
 
-
-['Vorname','Nachname','email','telefon','zeitvon','zeitbis','ort'].forEach(id => {
+// Listener für Datum und Zeit
+['Vorname','Nachname','email','telefon','datum','zeitvon','zeitbis','ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', checkFormValidity);
 });
+
 
 
 // PayPal-Bezahlbutton

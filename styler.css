@@ -297,13 +297,3 @@ button:hover {
     border-radius: 10px;
   }
 }
-
-.datum-zeit {
-  display: flex;           /* nebeneinander */
-  gap: 20px;               /* Abstand zwischen den Feldern */
-}
-
-.datum-zeit .datum-einzel {
-  display: flex;
-  flex-direction: column;  /* Label über Input */
-}
