@@ -142,25 +142,27 @@ document.getElementById('bestellung-weiter').onclick = () => {
 };
 function closeBestellformular() { document.getElementById('bestellformular').style.display = 'none'; }
 
-// Formulareingaben prüfen
 function checkFormValidity() {
   const vorname = document.getElementById('Vorname').value.trim();
   const nachname = document.getElementById('Nachname').value.trim();
   const email = document.getElementById('email').value.trim();
   const telefon = document.getElementById('telefon').value.trim();
-  const zeitvon = document.getElementById('zeitvon').value.trim();
-  const zeitbis = document.getElementById('zeitbis').value.trim();
   const ort = document.getElementById('ort').value.trim();
 
-  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && warenkorb.length > 0;
+  const datumvon = document.getElementById('datumvon').value.trim();
+  const datumbis = document.getElementById('datumbis').value.trim();
+  const zeitvon = document.getElementById('zeitvon').value.trim();
+  const zeitbis = document.getElementById('zeitbis').value.trim();
+
+  const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && datumvon && datumbis && warenkorb.length > 0;
   const valid = pflichtfelderGefüllt && zeitvon && zeitbis;
 
   bezahlenBtn.disabled = !valid;
   return valid;
 }
 
-// Input Listener
-['Vorname','Nachname','email','telefon','zeitvon','zeitbis','ort'].forEach(id => {
+// Listener für alle Eingabefelder
+['Vorname','Nachname','email','telefon','datumvon','datumbis','zeitvon','zeitbis','ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', checkFormValidity);
 });
 
