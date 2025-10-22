@@ -136,10 +136,11 @@ function saveCart() {
 // Warenkorb schließen
 function closeWarenkorb() { warenkorbPopup.style.display = 'none'; }
 
-// Bestellformular anzeigen
 document.getElementById('bestellung-weiter').onclick = () => {
-  document.getElementById('bestellformular').style.display = 'flex';
+  closeWarenkorb(); // Warenkorb-Popup schließen
+  document.getElementById('bestellformular').style.display = 'flex'; // Bestellformular öffnen
 };
+
 function closeBestellformular() { document.getElementById('bestellformular').style.display = 'none'; }
 
 function checkFormValidity() {
