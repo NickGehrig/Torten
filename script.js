@@ -143,24 +143,24 @@ function checkFormValidity() {
   const nachname = document.getElementById('Nachname').value.trim();
   const email = document.getElementById('email').value.trim();
   const telefon = document.getElementById('telefon').value.trim();
-const zeitwunsch = document.getElementById('zeitwunsch').value.trim();
+  const zeitvon = document.getElementById('zeitvon').value.trim();
+  const zeitbis = document.getElementById('zeitbis').value.trim();
   const ort = document.getElementById('ort').value.trim();
-  const alternativtermin = document.getElementById('alternativtermin').value.trim();
 
-  // Pflichtfelder außer wunschdatum + alternativtermin
+  // Pflichtfelder
   const pflichtfelderGefüllt = vorname && nachname && email && telefon && ort && warenkorb.length > 0;
 
-
-  const zeitOderAlternativ = (zeitwunsch !== '')
-
-  const valid = pflichtfelderGefüllt && zeitOderAlternativ;
+  // Zeitfenster muss angegeben sein
+  const valid = pflichtfelderGefüllt && zeitvon && zeitbis;
 
   bezahlenBtn.disabled = !valid;
   return valid;
 }
 
 
-['Vorname', 'Nachname', 'email', 'telefon', 'zeitwunsch', 'alternativtermin', 'ort'].forEach(id => {
+
+
+['Vorname', 'Nachname', 'email', 'telefon', 'zeitvon', 'zeitbis', 'ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     checkFormValidity();
   });
