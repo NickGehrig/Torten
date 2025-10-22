@@ -133,13 +133,13 @@ function saveCart() {
   localStorage.setItem('warenkorb', JSON.stringify(warenkorb));
 }
 
-// Warenkorb schließen
-function closeWarenkorb() { warenkorbPopup.style.display = 'none'; }
-
 document.getElementById('bestellung-weiter').onclick = () => {
-  closeWarenkorb(); // Warenkorb-Popup schließen
+  closeWarenkorb(); // Warenkorb schließen
   document.getElementById('bestellformular').style.display = 'flex'; // Bestellformular öffnen
 };
+
+
+
 
 function closeBestellformular() { document.getElementById('bestellformular').style.display = 'none'; }
 
@@ -273,13 +273,14 @@ function showMessage(text, type="info") {
   setTimeout(()=>{msg.style.display="none";},6000);
 }
 
-// Warenkorb zurücksetzen
 function resetWarenkorb(){
-  warenkorb=[];
+  warenkorb = [];
   saveCart();
   updateWarenkorbAnzeige();
+  closeWarenkorb();  // ✅ Warenkorb-Fenster wird geschlossen
   bestellForm.reset();
 }
+
 
 // Popup schließen beim Klick außerhalb
 window.onclick = function(event){
