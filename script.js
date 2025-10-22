@@ -1,4 +1,4 @@
-// Elemente
+// ---------- Elemente ----------
 const torten = document.querySelectorAll('.torte');
 const overlay = document.getElementById('lightbox');
 const img = document.getElementById('lightbox-img');
@@ -15,6 +15,8 @@ const gesamtpreis = document.getElementById('gesamtpreis');
 const bezahlenBtn = document.getElementById('bezahlen-btn');
 
 const bestellForm = document.getElementById('bestell-form');
+const bestellungWeiterBtn = document.getElementById('bestellung-weiter');
+const bestellformularDiv = document.getElementById('bestellformular');
 
 let selectedTorte = null;
 let warenkorb = JSON.parse(localStorage.getItem('warenkorb')) || [];
@@ -52,7 +54,9 @@ closeBtn.addEventListener('click', () => overlay.style.display = 'none');
 overlay.addEventListener('click', e => { if(e.target === overlay) overlay.style.display = 'none'; });
 
 // ---------- Warenkorb ----------
-warenkorbButton.addEventListener('click', () => {
+warenkorbButton.addEventListener('click', () => openWarenkorb());
+
+function openWarenkorb() {
   updateWarenkorbAnzeige();
   warenkorbPopup.style.display = 'flex';
   warenkorbPopup.style.position = 'fixed';
@@ -60,7 +64,11 @@ warenkorbButton.addEventListener('click', () => {
   warenkorbPopup.style.left = '50%';
   warenkorbPopup.style.transform = 'translate(-50%, -50%)';
   warenkorbPopup.style.zIndex = '9999';
-});
+}
+
+function closeWarenkorb() {
+  warenkorbPopup.style.display = 'none';
+}
 
 function updateWarenkorbAnzeige() {
   if (!warenkorbItems) return;
@@ -109,30 +117,30 @@ function updateWarenkorbAnzeige() {
   bezahlenBtn.disabled = warenkorb.length === 0 || !checkFormValidity();
 }
 
-// Artikel hinzufügen
+// ---------- Warenkorb Funktionen ----------
 function addToCart(torte) {
   const existing = warenkorb.find(item => item.name === torte.name);
   if(existing) existing.menge += 1;
   else warenkorb.push({...torte, menge:1});
-
   saveCart();
   updateWarenkorbAnzeige();
 }
 
-// Warenkorb speichern
 function saveCart() {
   localStorage.setItem('warenkorb', JSON.stringify(warenkorb));
 }
 
-// Weiter zum Bestellformular
-document.getElementById('bestellung-weiter').onclick = () => {
+// ---------- Weiter zum Bestellformular ----------
+bestellungWeiterBtn.addEventListener('click', () => {
   closeWarenkorb();
-  document.getElementById('bestellformular').style.display = 'flex';
-};
+  bestellformularDiv.style.display = 'flex';
+});
 
-function closeBestellformular() { document.getElementById('bestellformular').style.display = 'none'; }
+function closeBestellformular() {
+  bestellformularDiv.style.display = 'none';
+}
 
-// ---------- Form-Check ----------
+// ---------- Pflichtfelder + 4 Stunden ----------
 function checkFormValidity() {
   const vorname = document.getElementById('Vorname').value.trim();
   const nachname = document.getElementById('Nachname').value.trim();
@@ -160,7 +168,7 @@ function checkFormValidity() {
   return valid;
 }
 
-// Listener für alle Pflichtfelder
+// ---------- Listener Pflichtfelder ----------
 ['Vorname','Nachname','email','telefon','datum','zeitvon','zeitbis','ort'].forEach(id => {
   document.getElementById(id).addEventListener('input', checkFormValidity);
 });
@@ -177,72 +185,46 @@ bezahlenBtn.addEventListener('click', () => {
     createOrder: (data, actions) => actions.order.create({
       purchase_units: [{ amount: { value: summe.toFixed(2), currency_code: "CHF" } }]
     }),
-    onApprove: (data, actions) => {
-      return actions.order.capture().then(details => {
-        const formData = new FormData(bestellForm);
-        const formObject = Object.fromEntries(formData.entries());
-        const tortenText = warenkorb.map(item => `${item.name} (x${item.menge})`).join(", ");
-        formObject.tortenliste = tortenText;
-        formObject.zeitVon = document.getElementById('zeitvon').value;
-        formObject.zeitBis = document.getElementById('zeitbis').value;
-
-        fetch("https://formspree.io/f/xbloagqo", {
-          method:"POST",
-          headers: {"Accept":"application/json"},
-          body: new URLSearchParams({
-            ...formObject,
-            _to:"nickgehrig@gmx.ch",
-            _cc: formObject.email,
-            _replyto: formObject.email,
-            Nachricht:`Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} CHF, Artikel: ${tortenText}`
-          })
-        }).then(response => {
-          if(response.ok){
-            showMessage("Herzlichen Dank für Ihren Einkauf!");
-            resetWarenkorb();
-            closeWarenkorb();
-            closeBestellformular();
-            overlay.style.display = 'none';
-            window.scrollTo({top:0, behavior:'smooth'});
-          } else {
-            showMessage("Zahlung ok, aber E-Mail konnte nicht gesendet werden.","error");
-          }
-        });
-      });
-    },
+    onApprove: (data, actions) => actions.order.capture().then(details => {
+      sendBestellung(details);
+    }),
     onCancel: () => showMessage("Bezahlung abgebrochen.","info"),
     onError: (err) => { showMessage("Fehler bei der PayPal-Zahlung.","error"); console.error(err);}
   }).render('#paypal-button-container');
 });
 
-// ---------- Formular-Fallback ----------
-bestellForm.addEventListener('submit', event => {
-  event.preventDefault();
-  showMessage("Bestellung wird gesendet...", "info");
-
+// ---------- Bestellung senden ----------
+function sendBestellung(details=null){
   const formData = new FormData(bestellForm);
   formData.append("zeitVon", document.getElementById('zeitvon').value);
   formData.append("zeitBis", document.getElementById('zeitbis').value);
 
+  const formObject = Object.fromEntries(formData.entries());
+  const tortenText = warenkorb.map(item => `${item.name} (x${item.menge})`).join(", ");
+  formObject.tortenliste = tortenText;
+
+  if(details){
+    formObject.Nachricht = `Zahlung von ${details.payer.name.given_name} ${details.payer.name.surname}, Betrag: ${details.purchase_units[0].amount.value} CHF, Artikel: ${tortenText}`;
+  }
+
   fetch("https://formspree.io/f/xbloagqo", {
     method:"POST",
-    body: formData,
-    headers: {'Accept':'application/json'}
-  }).then(response => response.json())
-    .then(data => {
-      if(data.ok || data.success) {
-        showMessage("Bestellung wurde erfolgreich gesendet! Vielen Dank.","success");
-        resetWarenkorb();
-        closeBestellformular();
-        closeWarenkorb();
-      } else {
-        showMessage("Bestellung konnte nicht gesendet werden.","error");
-      }
-    }).catch(() => showMessage("Fehler beim Senden. Bitte überprüfe deine Internetverbindung.","error"));
-});
+    headers: {"Accept":"application/json"},
+    body: new URLSearchParams(formObject)
+  }).then(response => {
+    if(response.ok){
+      showMessage("Bestellung erfolgreich gesendet! Vielen Dank.","success");
+      resetWarenkorb();
+      closeWarenkorb();
+      closeBestellformular();
+    } else {
+      showMessage("Fehler beim Senden der Bestellung.","error");
+    }
+  }).catch(() => showMessage("Fehler beim Senden. Bitte Internetverbindung prüfen.","error"));
+}
 
 // ---------- Nachrichten ----------
-function showMessage(text, type="info") {
+function showMessage(text, type="info"){
   const msg = document.getElementById("nachricht");
   msg.innerText = text;
   msg.style.display = 'block';
@@ -255,7 +237,7 @@ function showMessage(text, type="info") {
   setTimeout(()=>{msg.style.display="none";},6000);
 }
 
-// ---------- Warenkorb zurücksetzen ----------
+// ---------- Warenkorb + Formular zurücksetzen ----------
 function resetWarenkorb(){
   warenkorb = [];
   saveCart();
