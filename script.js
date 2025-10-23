@@ -273,3 +273,21 @@ window.onclick = function(event){
 function closeWarenkorb(){
   warenkorbPopup.style.display='none';
 }
+// === Mindestdatum auf 7 Tage nach heutigem Datum setzen ===
+document.addEventListener("DOMContentLoaded", () => {
+    const pickupDateInput = document.getElementById("datum"); // richtige ID!
+    if (pickupDateInput) {
+        const today = new Date();
+        today.setDate(today.getDate() + 7); // +7 Tage ab heute
+        const minDate = today.toISOString().split("T")[0];
+        pickupDateInput.min = minDate;
+    }
+});
+// Nutzer kann kein Datum vor dem Mindestdatum manuell eingeben
+document.getElementById("datum").addEventListener("change", (e) => {
+    const min = e.target.min;
+    if (e.target.value < min) {
+        alert("Das gewählte Datum ist zu früh. Bitte wähle ein Datum mindestens 7 Tage im Voraus.");
+        e.target.value = "";
+    }
+});
