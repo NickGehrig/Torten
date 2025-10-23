@@ -251,3 +251,24 @@ window.onclick = function(event){
   if(event.target === warenkorbPopup) closeWarenkorb();
   if(event.target === overlay) overlay.style.display='none';
 };
+// ---------- Mindestdatum + Hinweis ---------- 
+document.addEventListener("DOMContentLoaded", () => {
+  const datumInput = document.getElementById("datum");
+  if (!datumInput) return;
+
+  const updateMinDate = () => {
+    const today = new Date();
+    const minSelectable = new Date();
+    minSelectable.setDate(today.getDate() + 7);
+    datumInput.min = minSelectable.toISOString().split("T")[0];
+
+    // Hinweis im Feld und Tooltip
+    datumInput.placeholder = `Mindestens 7 Tage im Voraus (${datumInput.min})`;
+    datumInput.title = `Bitte wähle ein Datum mindestens 7 Tage im Voraus (${datumInput.min})`;
+  };
+
+  updateMinDate();
+
+  // Aktualisiere täglich (z. B. wenn Seite über Nacht offen bleibt)
+  setInterval(updateMinDate, 60 * 60 * 1000);
+});
