@@ -255,27 +255,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const today = new Date();
         const minSelectable = new Date();
         minSelectable.setDate(today.getDate() + 7); // frühestens 7 Tage später
-        datumInput.min = minSelectable.toISOString().split("T")[0];
-
-        // Graue Tage (heute bis +6 Tage) nur zur Visualisierung
-        const selected = new Date(datumInput.value);
-        if (!datumInput.value || selected < minSelectable) {
-            datumInput.style.backgroundColor = "#ddd";
-            datumInput.style.color = "#777";
-            datumInput.setCustomValidity("Bitte wähle ein Datum mindestens 7 Tage im Voraus.");
-        } else {
-            datumInput.style.backgroundColor = "";
-            datumInput.style.color = "";
-            datumInput.setCustomValidity("");
-        }
+        datumInput.min = minSelectable.toISOString().split("T")[0]; // setzt den minimalen wählbaren Tag
     };
 
-    // Input-Event prüfen
-    datumInput.addEventListener("input", updateMinDate);
-
-    // Initial ausführen
-    updateMinDate();
-
-    // Jeden Tag automatisch prüfen, falls sich der Tag ändert
-    setInterval(updateMinDate, 60 * 60 * 1000); // jede Stunde prüfen
+    updateMinDate(); // direkt ausführen
 });
