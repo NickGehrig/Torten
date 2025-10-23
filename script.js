@@ -162,7 +162,14 @@ function checkFormValidity(){
         }
     }
 
-    const pflichtfelder = vorname && nachname && email && telefon && ort && datum && warenkorb.length>0;
+    // Prüfen, ob Datum mindestens 7 Tage in der Zukunft
+    const today = new Date();
+    const minDatum = new Date();
+    minDatum.setDate(today.getDate() + 7);
+    const selectedDatum = datum ? new Date(datum) : null;
+    const datumValid = selectedDatum && selectedDatum >= minDatum;
+
+    const pflichtfelder = vorname && nachname && email && telefon && ort && datum && warenkorb.length>0 && datumValid;
     const valid = pflichtfelder && zeitValid;
 
     bezahlenBtn.disabled = !valid;
@@ -246,7 +253,7 @@ window.addEventListener('click', e => {
     if(e.target === overlay) overlay.style.display='none';
 });
 
-
+// ---------- DATUMSKONTROLLE (funktioniert auch auf Handy) ----------
 document.addEventListener("DOMContentLoaded", () => {
     const datumInput = document.getElementById("datum");
     if (!datumInput) return;
@@ -254,9 +261,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const updateMinDate = () => {
         const today = new Date();
         const minSelectable = new Date();
-        minSelectable.setDate(today.getDate() + 7); // frühestens 7 Tage später
-        datumInput.min = minSelectable.toISOString().split("T")[0]; // setzt den minimalen wählbaren Tag
+        minSelectable.setDate(today.getDate() + 7);
+        datumInput.min = minSelectable.toISOString().split("T")[0];
     };
 
-    updateMinDate(); // direkt ausführen
+    const validateDatum = () => {
+        const today = new Date();
+        const minSelectable = new Date();
+        minSelectable.setDate(today.getDate() + 7);
+        const selected = new Date(datumInput.value);
+
+        if (!datumInput.value || selected < minSelectable) {
+            datumInput.setCustomValidity("Bitte wähle ein Datum mindestens 7 Tage im Voraus.");
+        } else {
+            datumInput.setCustomValidity("");
+        }
+        checkFormValidity();
+    };
+
+    updateMinDate();
+    datumInput.addEventListener("input", validateDatum);
+
+    bestellForm.addEventListener("submit", (e) => {
+        validateDatum();
+        if (!datumInput.checkValidity()) {
+            e.preventDefault();
+            datumInput.reportValidity();
+        }
+    });
+
+    setInterval(updateMinDate, 60 * 60 * 1000);
 });
